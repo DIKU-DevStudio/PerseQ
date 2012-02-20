@@ -9,6 +9,12 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
+- url: /css
+  static_dir: bootstrap/css
+
+- url: /js
+  static_dir: bootstrap/js
+
 - url: .*
   script: main.py
 
