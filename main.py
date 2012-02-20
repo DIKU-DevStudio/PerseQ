@@ -16,15 +16,44 @@
 #
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+from wikitools import wiki, page, api
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 
-class MainHandler(webapp.RequestHandler):
+
+class LookUpSNP(webapp.RequestHandler):
     def get(self):
-        self.response.out.write('Hello world!')
+        snp = self.request.get("snp")
+        if len(snp) == 0:
+            self.response.out.write("No SNP title given (snp='')")
+            return
 
+        site = wiki.Wiki("http://bots.snpedia.com/api.php")
+        params = {
+                        'action': 'query',
+                        'prop': 'revisions',
+                        'rvprop': 'content|timestamp',
+                        'rvlimit': '1',
+                        'titles':snp
+                }
+        # pagehandle = page.Page(site,title=snp)
+        req = api.APIRequest(site, params)
+        result = req.query(querycontinue=False)
+
+        pageid = int(result['query']['pages'].keys()[0])
+        if pageid == -1:
+            self.response.out.write("SNP title does not exist (NoPage)")
+            return
+        
+        # print pageid
+
+        pp.pprint(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8').split("\n"))
+        # snp_page = pagehandle.getWikiText()
+    	# self.response.out.write(result)
 
 def main():
-    application = webapp.WSGIApplication([('/', MainHandler)],
+    application = webapp.WSGIApplication([('/', LookUpSNP)],
                                          debug=True)
     util.run_wsgi_app(application)
 
