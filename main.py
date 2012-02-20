@@ -31,30 +31,28 @@ class LookUpSNP(webapp.RequestHandler):
 
         site = wiki.Wiki("http://bots.snpedia.com/api.php")
         params = {
-                        'action': 'query',
-                        'prop': 'revisions',
-                        'rvprop': 'content|timestamp',
-                        'rvlimit': '1',
-                        'titles':snp
-                }
-        # pagehandle = page.Page(site,title=snp)
+            'action': 'query',
+            'prop': 'revisions',
+            'rvprop': 'content|timestamp',
+            'rvlimit': '1',
+            'titles':snp
+        }
         req = api.APIRequest(site, params)
         result = req.query(querycontinue=False)
 
+        # if pageid == -1 <=> title=snp does not exist
         pageid = int(result['query']['pages'].keys()[0])
         if pageid == -1:
             self.response.out.write("SNP title does not exist (NoPage)")
             return
         
-        # print pageid
-
-        pp.pprint(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8').split("\n"))
-        # snp_page = pagehandle.getWikiText()
+        # should use the proper respone.out.write(result)
+        # but for some reason, right now it looks like crap..
+        pp.pprint(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8'))
     	# self.response.out.write(result)
 
 def main():
-    application = webapp.WSGIApplication([('/', LookUpSNP)],
-                                         debug=True)
+    application = webapp.WSGIApplication([('/', LookUpSNP)], debug=True)
     util.run_wsgi_app(application)
 
 
