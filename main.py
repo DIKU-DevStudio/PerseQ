@@ -17,6 +17,10 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
+import jinja2
+# import webapp2
+# import pysam
+
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -28,7 +32,6 @@ class LookUpSNP(webapp.RequestHandler):
         if len(snp) == 0:
             self.response.out.write("No SNP title given (snp='')")
             return
-
         site = wiki.Wiki("http://bots.snpedia.com/api.php")
         params = {
             'action': 'query',
@@ -48,8 +51,8 @@ class LookUpSNP(webapp.RequestHandler):
         
         # should use the proper respone.out.write(result)
         # but for some reason, right now it looks like crap..
-        pp.pprint(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8'))
-    	# self.response.out.write(result)
+        # pp.pprint()
+    	self.response.out.write(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8').split("\n"))
 
 def main():
     application = webapp.WSGIApplication([('/', LookUpSNP)], debug=True)
