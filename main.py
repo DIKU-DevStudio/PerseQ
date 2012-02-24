@@ -36,7 +36,7 @@ class LookUpSNP(webapp.RequestHandler):
         params = {
             'action': 'query',
             'prop': 'revisions',
-            'rvprop': 'content|timestamp',
+            'rvprop': 'content',
             'rvlimit': '1',
             'titles':snp
         }
@@ -49,10 +49,9 @@ class LookUpSNP(webapp.RequestHandler):
             self.response.out.write("SNP title does not exist (NoPage)")
             return
         
-        # should use the proper respone.out.write(result)
-        # but for some reason, right now it looks like crap..
-        # pp.pprint()
-    	self.response.out.write(result['query']['pages'][str(pageid)]['revisions'][0]['*'].encode('utf-8').split("\n"))
+        # OMFG this is ugly..
+
+        self.response.out.write(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))
 
 def main():
     application = webapp.WSGIApplication([('/', LookUpSNP)], debug=True)
