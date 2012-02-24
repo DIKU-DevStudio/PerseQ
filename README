@@ -1,10 +1,20 @@
 # Documentation
+PerseQ stands for Personal Sequencing, meaing presenting and decoding and analysing your DNA wrt. interesting SNPs.
+
+## Platform
+Google AppEngine
+
+## Language
+Python 2.7
 
 ## Template Language
 Jinja2
-TODO:
-- Edit config file to add sourcefiles
-- Exmaple code
 
 ## Framework
-AppEngine
+WebApp2
+
+## CSS
+bootstrap
+
+## Communication
+json
