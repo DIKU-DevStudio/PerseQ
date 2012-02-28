@@ -18,13 +18,15 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
 import jinja2
+from jinja2 import Environment, FileSystemLoader
+import os
 # import webapp2
 # import pysam
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-
+e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
 
 class LookUpSNP(webapp.RequestHandler):
     def get(self):
@@ -48,13 +50,19 @@ class LookUpSNP(webapp.RequestHandler):
         if pageid == -1:
             self.response.out.write("SNP title does not exist (NoPage)")
             return
-        
-        # OMFG this is ugly..
 
+        # OMFG this is ugly..
         self.response.out.write(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))
 
+class TestJinja(webapp.RequestHandler):
+    def get(self):
+        t = e.get_template('hello.html')
+        self.response.out.write(t.render(msg = 'Hello World!!!'))
+
+
 def main():
-    application = webapp.WSGIApplication([('/', LookUpSNP)], debug=True)
+    application = webapp.WSGIApplication([('/', LookUpSNP),
+                                          ('/test', TestJinja)], debug=True)
     util.run_wsgi_app(application)
 
 
