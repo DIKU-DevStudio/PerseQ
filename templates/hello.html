@@ -1,7 +1,5 @@
-<html><head>
-    <title>My Jinja2 stuff</title>
-</head>
-<body>
-    <pre>{{msg}}</pre>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<pre>{{msg}}</pre>
+{% endblock %}
