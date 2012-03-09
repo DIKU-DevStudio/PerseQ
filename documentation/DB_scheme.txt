@@ -1,0 +1,29 @@
+DB Scheme as decided by the group at todays meetings:
+
+SNP
+-----------------------
+id				integer
+magnitude		float
+related_papers	many_to_many(URLS)
+seq_data		blob
+domain_tags		[]strings
+
+Users
+-----------------------
+name			string
+email			string
+id				integer
+created			date
+last_login		date
+role			[]string # admin, subject, expert
+
+subject (User) # maybe a relation to expert/admin
+-----------------------
+snps				many_to_many(SNP)
+cached_information	many_to_many(PROCESSED_INFO_SNP)
+
+
+
+example API
+userpage:	"/user/{{user_id}}/" # user_id=5
+SNP_page:	"/SNP/{{snp_id}}"	# snp_id=1805007
