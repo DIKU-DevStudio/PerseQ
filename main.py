@@ -23,6 +23,7 @@ import os
 
 from xml.dom.minidom import parseString
 from Bio import Entrez
+from models import snp, snp_url, domain_tag
 
 # list of valid rsids..
 snpids = [
