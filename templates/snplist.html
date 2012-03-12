@@ -4,7 +4,7 @@
 <body>
 	{% for snp in snps %}
 		<p>
-			<a href="/dbsnp/?snp={{snp}}">{{snp}}</a>
+			<a href="/dbsnp/?snp={{snp.snpid}}">{{snp.snpid}}</a>
 		</p>
 	{% endfor %}
 </body>
