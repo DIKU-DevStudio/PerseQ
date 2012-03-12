@@ -5,10 +5,10 @@
 	{% for snp in snps %}
     <tr>
         <td>
-            <a href="/dbsnp/?snp={{snp}}" class="btn">{{snp}}</a>
+            <a href="/dbsnp/?snp={{snp.snpid}}" class="btn">{{snp.snpid}}</a>
         </td>
         <td>
-			<a href="/test/?snp={{snp}}" class="btn">Tag</a>
+			<a href="/test/?snp={{snp.snpid}}" class="btn">Tag</a>
         </td>
     </tr>
     {% endfor %}

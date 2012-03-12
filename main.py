@@ -93,8 +93,12 @@ class Test(AppRequestHandler):
     def get(self):
         self.setTemplate('autocomplete.html')
         snp = self.request.get("snp")
-        self.out({'tags':['Unknown','HIV','Cancer','Asdf'], 'snp':snp})
+        self.out({'tags':['Unknown','Oncology','Dermatology','Neurology'], 'snp':snp})
     def post(self):
+        snp = self.request.post("snp")
+        tag = self.request.post("tag")
+
+
         self.out();
 
 
