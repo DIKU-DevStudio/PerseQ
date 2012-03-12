@@ -1,4 +1,4 @@
-application: pms
+application: perseq
 version: 1
 runtime: python27
 api_version: 1
@@ -9,11 +9,13 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
+
 - url: /css
   static_dir: bootstrap/css
-
 - url: /js
   static_dir: bootstrap/js
+- url: /img
+  static_dir: bootstrap/img
 
 - url: .*
   script: main.py
