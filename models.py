@@ -1,9 +1,9 @@
 from google.appengine.ext import db
 
 # SNP models:
-class SNP(db.Model):
-	# The essential information
-	id = db.IntegerProperty()
+class snp(db.Model):
+    # The essential information
+    id = db.IntegerProperty()
     magnitude = db.FloatProperty()
 
     # The raw SNP pattern - optional?
@@ -13,23 +13,23 @@ class SNP(db.Model):
     updated = db.DateTimeProperty(auto_now_add=True)
 
     # Domain Tags assigned (many to many)
-	domain_tags = db.ListProperty(db.Key)
-  
-  	# SNP URLS (one to many) -
-  	#   this is created by the snp_url 
+    domain_tags = db.ListProperty(db.Key)
 
- class SNP_URL(db.Model):
-    snp = db.ReferenceProperty(SNP, collection_name = 'urls'
+# SNP URLS (one to many) -
+#   this is created by the snp_url 
+
+class snp(db.Model):
+    snp = db.ReferenceProperty(snp, collection_name = 'urls')
     url = db.StringProperty()
     title = db.StringProperty()
     updated = db.DateTimeProperty(auto_now_add=True)
 
 # Tags for domains (e.g. 'Dermitology', 'Oncology')
-class Domain_Tag(db.Model):
+class domain(db.Model):
     tag = db.StringProperty()
     updated = db.DateTimeProperty(auto_now_add=True)
 
     # Property so we can quickly query SNPs with this tag
-  @property
+    @property
     def snps(self):
-        return SNP.gql("WHERE domain_tags = :1", self.key())
+        return snp.gql("WHERE domain_tags = :1", self.key())
