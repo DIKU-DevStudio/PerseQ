@@ -42,6 +42,40 @@ class snpsList(webapp.RequestHandler):
         
         self.response.out.write(t.render(snps = snpids))
 
+# Given a list of comma-seperated SNP cluster ids (example: "1805007,1805008")
+# this method returns a list of article-ids of all articles referencing the given snps
+# result for snp="1805007":
+# [{u'DbFrom': 'snp', u'IdList': ['1805007'], u'LinkSetDbHistory': [], u'LinkSetDb': [{u'DbTo': 'pubmed', u'Link': [{u'Id': '21700618'}, {u'Id': '20670983'}, {u'Id': '20585627'}, {u'Id': '20042077'}, {u'Id': '19884608'}, {u'Id': '17999355'}, {u'Id': '17952075'}], u'LinkName': 'snp_pubmed_cited'}]}]
+class pubmed(webapp.RequestHandler):
+    def get(self):
+        snp = self.request.get("snp")
+        if not snp:
+            snp = "1805007"
+
+        handle = Entrez.elink(db="pubmed", dbfrom="snp", id=snp, linkname="snp_pubmed_cited")
+        dbs = Entrez.read(handle)
+        # print record
+        handle.close()
+
+        print dbs
+        # we only get results from the snp-database
+        if len(dbs) == 0:
+            self.response.out.write("No referenced articles")
+            return
+
+        ref_ids = []
+        for db in dbs:
+            if len(db["LinkSetDb"]) == 0:
+                continue               
+            # linkname="snp_pubmed_cited" means the uery only returns results to pubmed
+            for ref in db["LinkSetDb"][0]["Link"]:
+                ref_ids.append(ref['Id'])
+
+        if len(ref_ids) > 0:
+            self.response.out.write(",".join(ref_ids))
+        else:
+            self.response.out.write("No referenced articles")   
+
 class dbSNP(webapp.RequestHandler):
     def get(self):
         snp = self.request.get("snp")
@@ -94,8 +128,9 @@ class TestJinja(webapp.RequestHandler):
 
 def main():
     application = webapp.WSGIApplication([('/', snpsList),
-                                          ('/test', TestJinja),
+                                          ('/test/', TestJinja),
                                           ('/dbsnp/', dbSNP),
+                                          ('/pubmed/', pubmed)
                                           ], debug=True)
     util.run_wsgi_app(application)
 
