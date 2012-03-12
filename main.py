@@ -23,8 +23,7 @@ import os
 
 from xml.dom.minidom import parseString
 from Bio import Entrez
-from models import SNP, SNP_URL, Domain_Tag
-
+from models import snp, snp_url, domain_tag
 
 Entrez.email = 'pamad05+entrez@gmail.com'
 # import webapp2
@@ -38,6 +37,9 @@ e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 
 class snpsList(webapp.RequestHandler):
     def get(self):
         t = e.get_template('snplist.html')
+        snpids = snp.all()
+        snpids.order("snpid")
+        
         self.response.out.write(t.render(snps = snpids))
 
 class dbSNP(webapp.RequestHandler):

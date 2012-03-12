@@ -47,8 +47,8 @@ snpids = [
 "4408545"]
 
 def init():
-	for snpid in snpids:
-		thissnp = snp(id=int(snpid))
-		print 'adding ' + snpid
+	for id in snpids:
+		thissnp = snp(snpid=int(id))
+		print 'adding ' + id
    		thissnp.put()
    

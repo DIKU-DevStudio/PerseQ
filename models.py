@@ -3,7 +3,7 @@ from google.appengine.ext import db
 # SNP models:
 class snp(db.Model):
     # The essential information
-    id = db.IntegerProperty()
+    snpid = db.IntegerProperty()
     magnitude = db.FloatProperty()
 
     # The raw SNP pattern - optional?
@@ -18,14 +18,14 @@ class snp(db.Model):
 # SNP URLS (one to many) -
 #   this is created by the snp_url 
 
-class snp(db.Model):
+class snp_url(db.Model):
     snp = db.ReferenceProperty(snp, collection_name = 'urls')
     url = db.StringProperty()
     title = db.StringProperty()
     updated = db.DateTimeProperty(auto_now_add=True)
 
 # Tags for domains (e.g. 'Dermitology', 'Oncology')
-class domain(db.Model):
+class domain_tag(db.Model):
     tag = db.StringProperty()
     updated = db.DateTimeProperty(auto_now_add=True)
 
