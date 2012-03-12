@@ -1,4 +1,4 @@
-from models import SNP
+from models import snp
 
 # list of valid rsids..
 snpids = [
@@ -48,7 +48,7 @@ snpids = [
 
 def init():
 	for snpid in snpids:
-		snp = SNP(id=int(snpid))
+		thissnp = snp(id=int(snpid))
 		print 'adding ' + snpid
-   		snp.put()
+   		thissnp.put()
    
