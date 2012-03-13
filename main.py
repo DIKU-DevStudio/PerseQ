@@ -43,37 +43,59 @@ class snpsList(webapp.RequestHandler):
         self.response.out.write(t.render(snps = snpids))
 
 # Given a list of comma-seperated SNP cluster ids (example: "1805007,1805008")
-# this method returns a list of article-ids of all articles referencing the given snps
-# result for snp="1805007":
-# [{u'DbFrom': 'snp', u'IdList': ['1805007'], u'LinkSetDbHistory': [], u'LinkSetDb': [{u'DbTo': 'pubmed', u'Link': [{u'Id': '21700618'}, {u'Id': '20670983'}, {u'Id': '20585627'}, {u'Id': '20042077'}, {u'Id': '19884608'}, {u'Id': '17999355'}, {u'Id': '17952075'}], u'LinkName': 'snp_pubmed_cited'}]}]
+# this class queries for all the articles referenced from each of the SNP-ids and 
+# returns a list of dicts containing three values for each article:
+# - 'title' article
+# - 'abstract' of article
+# - 'PMID' (PubMed ID) of article
 class pubmed(webapp.RequestHandler):
     def get(self):
         snp = self.request.get("snp")
-        if not snp:
-            snp = "1805007"
+        if snp == "":
+            self.response.out.write("No snpId provided.")
+            return
 
+        # Query dbSNP for PMIDs of articles referenced by this SNP
         handle = Entrez.elink(db="pubmed", dbfrom="snp", id=snp, linkname="snp_pubmed_cited")
         dbs = Entrez.read(handle)
         # print record
         handle.close()
 
-        # we only get results from the snp-database
+        # no results to return
         if len(dbs) == 0:
             self.response.out.write("No referenced articles")
             return
-
-        ref_ids = []
+        
+        # - should just be one, but for the hell of it, let's capture all the cases
+        ref_ids = [] # holds the id of each of the referened articles
+        
+        # for each database with references to this snp
         for db in dbs:
             if len(db["LinkSetDb"]) == 0:
                 continue               
-            # linkname="snp_pubmed_cited" means the uery only returns results to pubmed
+            # linkname="snp_pubmed_cited" means just one LinkSetDb - namely PubMed
             for ref in db["LinkSetDb"][0]["Link"]:
                 ref_ids.append(ref['Id'])
 
-        if len(ref_ids) > 0:
-            self.response.out.write(",".join(ref_ids))
-        else:
-            self.response.out.write("No referenced articles")   
+        # fetch all the articles with ids in ref_ids
+        handle = Entrez.efetch("pubmed", id=ref_ids, retmode="xml")
+        pubs = Entrez.read(handle)
+        handle.close()
+
+        # For each pubmed article, extract title, abstract and id (might not be in the same order as was queried)
+        articles = []
+        for pub in pubs:
+            # TODO: abstracts are somewhat grouped into labels:
+            # example - Background, Result and Conclusion
+            articles.append({
+                "title" : pub["MedlineCitation"]["Article"]["ArticleTitle"],
+                "abstract": pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"],
+                "pmid": pub["MedlineCitation"]["PMID"]
+            })
+
+        # print each article
+        t = e.get_template('pubmeds.html')        
+        self.response.out.write(t.render(pubmeds = articles))
 
 class dbSNP(webapp.RequestHandler):
     def get(self):
