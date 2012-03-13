@@ -87,9 +87,22 @@ class pubmed(webapp.RequestHandler):
         for pub in pubs:
             # TODO: abstracts are somewhat grouped into labels:
             # example - Background, Result and Conclusion
+            base_abs = pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"]
+            categories = []
+            for abstract in base_abs:
+                label = None
+                if hasattr(abstract, "attributes"):
+                   if abstract.attributes.has_key("Label"):
+                       label = abstract.attributes["Label"]
+
+                categories.append({
+                    "label" : label,
+                    "text" : abstract,
+                })
+
             articles.append({
                 "title" : pub["MedlineCitation"]["Article"]["ArticleTitle"],
-                "abstract": pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"],
+                "abstracts": categories,
                 "pmid": pub["MedlineCitation"]["PMID"]
             })
 
