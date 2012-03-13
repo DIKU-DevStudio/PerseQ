@@ -46,7 +46,7 @@ class snpsList(webapp.RequestHandler):
 # this class queries for all the articles referenced from each of the SNP-ids and 
 # returns a list of dicts containing three values for each article:
 # - 'title' article
-# - 'abstract' of article
+# - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
 class pubmed(webapp.RequestHandler):
     def get(self):
