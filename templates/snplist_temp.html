@@ -1,0 +1,11 @@
+<html><head>
+    <title>snps</title>
+</head>
+<body>
+	{% for snp in snps %}
+		<p>
+			<a href="/dbsnp/?snp={{snp}}">{{snp}}</a>
+		</p>
+	{% endfor %}
+</body>
+</html>
