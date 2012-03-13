@@ -57,7 +57,6 @@ class pubmed(webapp.RequestHandler):
         # print record
         handle.close()
 
-        print dbs
         # we only get results from the snp-database
         if len(dbs) == 0:
             self.response.out.write("No referenced articles")
