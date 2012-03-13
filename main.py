@@ -89,15 +89,28 @@ class LookUpSNP(AppRequestHandler):
 
 
 
-class Test(AppRequestHandler):
+class Tag(AppRequestHandler):
     def get(self):
+        # Get tags logic
         self.setTemplate('autocomplete.html')
-        snp = self.request.get("snp")
-        self.out({'tags':['Unknown','Oncology','Dermatology','Neurology'], 'snp':snp})
+        snpStr = self.request.get("snp")
+        snpObj = snp.gql("WHERE snpid = "+snpStr).get()
+        tags = domain_tag.all()
+        #tags = snpObj.tags
+        self.out({'tags':tags, 'snp':snpObj})
     def post(self):
-        snp = self.request.post("snp")
-        tag = self.request.post("tag")
+        # Add tag logic
+        snpStr = self.request.get("snp")
+        tagStr = self.request.get("tag")
+        snpObj = snp.gql('WHERE snpid = '+snpStr).get()
+        tagObj = domain_tag.gql("WHERE tag = '"+tagStr+"'").get()
+        methodStr = self.request.get("method")
 
+        if methodStr == 'delete':
+            snpObj.domain_tags.remove(tagObj.key())
+        else:
+            snpObj.domain_tags.append(tagObj.key())
+        snpObj.put()
 
         self.out();
 
@@ -106,7 +119,7 @@ class Test(AppRequestHandler):
 def main():
     application = webapp.WSGIApplication([('/', snpsList),
                                           ('/dbsnp/', dbSNP),
-                                          ('/test/', Test),
+                                          ('/tag/', Tag),
                                           ], debug=True)
     util.run_wsgi_app(application)
 

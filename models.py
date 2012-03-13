@@ -15,6 +15,10 @@ class snp(db.Model):
     # Domain Tags assigned (many to many)
     domain_tags = db.ListProperty(db.Key)
 
+    @property
+    def tags(self):
+        return db.get(self.domain_tags)
+
 # SNP URLS (one to many) -
 #   this is created by the snp_url 
 

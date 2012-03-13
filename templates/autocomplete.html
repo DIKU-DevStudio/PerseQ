@@ -6,11 +6,16 @@
     function MyVal() {}
     MyVal.tags = [];
 
-    function addTag(tag) {
+    function addTag(tag, post) {
         if($.inArray(tag, MyVal.typeahead.data('typeahead').source) == -1) {
             MyVal.typeahead.data('typeahead').source.push($('#tag').val());
         }
         if($.inArray(tag, MyVal.tags) == -1) {
+            if(post != false) {
+                $.post('/tag/', {'snp':'{{snp.snpid}}', 'tag':tag, 'method':'add'}, function(html) {
+                    console.log('Added '+tag);
+                });
+            }
             $('<a href="javascript:void(0);">'+tag+' </a>').addClass('btn')
                 .append($('<i class="icon-remove"></i>').click(removeTag))
                 .appendTo("#tags");
@@ -21,6 +26,9 @@
         var tag = $(e.target).parent().text().trim()
         var i = $.inArray(tag, MyVal.tags);
         if(i != -1) {
+            $.post('/tag/', {'snp':'{{snp.snpid}}', 'tag':tag, 'method':'delete'}, function(html) {
+                    console.log(tag+' removed');
+            });
             delete MyVal.tags[i];
         }
         $(e.target).parent().remove();
@@ -29,7 +37,7 @@
             // Load tags
             var tags = [];
             {% for tag in tags %}
-            tags.push("{{tag}}");
+            tags.push("{{tag.tag}}");
             {% endfor %}
 
             // Create typeahead and list
@@ -45,12 +53,16 @@
                 $('#tag').val('');
                 });
 
+            {% for tag in snp.tags %}
+            addTag('{{tag.tag}}', false);
+            {% endfor %}
+
     });
 </script>
 {% endblock %}
 
 {% block content %}
-<h1>Tagging {{snp}}</h1>
+<h1>Tagging {{snp.snpid}}</h1>
 <div class="input-append">
     <input type="text" class="typeahead" id="tag"/>
     <span class="add-on"><a href="javascript:void(0);" id="submittag">Tag</a></span>
