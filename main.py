@@ -17,7 +17,7 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
-from AppRequestHandler import AppRequestHandler
+from Utilities import AppRequestHandler
 
 import jinja2
 from jinja2 import Environment, FileSystemLoader
