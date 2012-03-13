@@ -1,4 +1,13 @@
 {% for pub in pubmeds %}
-	{{pub.title}} </br>
-	{{pub.abstract}} </br> </br>
+	<p>
+	<h1>{{pub.title}}</h1>
+	{% for abstract in pub.abstracts %}
+		{% if abstract.label is none %}
+			<p>{{abstract.text}}</p>
+		{% else %}
+			<p>{{abstract.label}}</p>
+			<p>{{abstract.text}}</p>
+		{% endif %}
+	{% endfor %}
+	</p>
 {% endfor %}

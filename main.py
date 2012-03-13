@@ -46,7 +46,7 @@ class snpsList(webapp.RequestHandler):
 # this class queries for all the articles referenced from each of the SNP-ids and 
 # returns a list of dicts containing three values for each article:
 # - 'title' article
-# - 'abstract' of article
+# - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
 class pubmed(webapp.RequestHandler):
     def get(self):
@@ -87,9 +87,22 @@ class pubmed(webapp.RequestHandler):
         for pub in pubs:
             # TODO: abstracts are somewhat grouped into labels:
             # example - Background, Result and Conclusion
+            base_abs = pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"]
+            categories = []
+            for abstract in base_abs:
+                label = None
+                if hasattr(abstract, "attributes"):
+                   if abstract.attributes.has_key("Label"):
+                       label = abstract.attributes["Label"]
+
+                categories.append({
+                    "label" : label,
+                    "text" : abstract,
+                })
+
             articles.append({
                 "title" : pub["MedlineCitation"]["Article"]["ArticleTitle"],
-                "abstract": pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"],
+                "abstracts": categories,
                 "pmid": pub["MedlineCitation"]["PMID"]
             })
 
