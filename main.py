@@ -59,11 +59,6 @@ class pubmed(AppRequestHandler):
         dbs = Entrez.read(handle)
         # print record
         handle.close()
-
-        # no results to return
-        if len(dbs) == 0:
-            self.response.out.write("No referenced articles")
-            return
         
         # - should just be one, but for the hell of it, let's capture all the cases
         ref_ids = [] # holds the id of each of the referened articles
@@ -75,6 +70,11 @@ class pubmed(AppRequestHandler):
             # linkname="snp_pubmed_cited" means just one LinkSetDb - namely PubMed
             for ref in db["LinkSetDb"][0]["Link"]:
                 ref_ids.append(ref['Id'])
+
+        # no results to return
+        if len(ref_ids) == 0:
+            self.response.out.write("No referenced articles")
+            return
 
         # fetch all the articles with ids in ref_ids
         handle = Entrez.efetch("pubmed", id=ref_ids, retmode="xml")
@@ -90,6 +90,7 @@ class pubmed(AppRequestHandler):
             categories = []
             for abstract in base_abs:
                 label = None
+
                 if hasattr(abstract, "attributes"):
                    if abstract.attributes.has_key("Label"):
                        label = abstract.attributes["Label"]
@@ -113,8 +114,9 @@ class dbSNP(AppRequestHandler):
     def get(self):
         self.setTemplate('sample.html')
         snp = self.request.get("snp")
-        if not snp:
-            snp = "1805007"
+        if snp == "":
+            self.out("Invalid SNP_id")
+            return
 
         res = Entrez.efetch("snp", id=snp, rettype="xml", retmode="text")
         dom = parseString(res.read())
@@ -156,7 +158,6 @@ class LookUpSNP(AppRequestHandler):
         self.out({'msg':(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))})
 
 
-
 class Tag(AppRequestHandler):
     def get(self):
         # Get tags logic
@@ -181,7 +182,6 @@ class Tag(AppRequestHandler):
         snpObj.put()
 
         self.out();
-
 
 
 def main():
