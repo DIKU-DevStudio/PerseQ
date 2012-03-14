@@ -17,7 +17,7 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
-from Utilities import AppRequestHandler
+from utilities import AppRequestHandler
 
 import jinja2
 from jinja2 import Environment, FileSystemLoader
@@ -51,7 +51,7 @@ class pubmed(AppRequestHandler):
     def get(self):
         snp = self.request.get("snp")
         if snp == "":
-            self.response.out.write("No snpId provided.")
+            self.response.out.write("No SNP id provided.")
             return
 
         # Query dbSNP for PMIDs of articles referenced by this SNP
@@ -59,7 +59,7 @@ class pubmed(AppRequestHandler):
         dbs = Entrez.read(handle)
         # print record
         handle.close()
-        
+
         # - should just be one, but for the hell of it, let's capture all the cases
         ref_ids = [] # holds the id of each of the referened articles
         
@@ -84,8 +84,6 @@ class pubmed(AppRequestHandler):
         # For each pubmed article, extract title, abstract and id (might not be in the same order as was queried)
         articles = []
         for pub in pubs:
-            # TODO: abstracts are somewhat grouped into labels:
-            # example - Background, Result and Conclusion
             base_abs = pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"]
             categories = []
             for abstract in base_abs:
@@ -115,7 +113,7 @@ class dbSNP(AppRequestHandler):
         self.setTemplate('sample.html')
         snp = self.request.get("snp")
         if snp == "":
-            self.out("Invalid SNP_id")
+            self.out("No SNP_id provided")
             return
 
         res = Entrez.efetch("snp", id=snp, rettype="xml", retmode="text")
