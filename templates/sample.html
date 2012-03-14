@@ -1,19 +1,2 @@
-{% extends "base.html" %}
-
-{% block content %}
-<table class="table"><thead><tr><th class="span3">SNP</th></thead><tbody>
-	{% for snp in snps %}
-    <tr>
-        <td>
-            <a href="/dbsnp/?snp={{snp.snpid}}" class="btn">{{snp.snpid}}</a>
-        </td>
-        <td>
-			<a href="/tag/?snp={{snp.snpid}}" class="btn">Tag</a>
-        </td>
-    </tr>
-    {% endfor %}
-</tbody></table>
-
 <pre>{{msg}}</pre>
-{% endblock %}
 

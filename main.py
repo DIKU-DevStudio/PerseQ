@@ -36,10 +36,78 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class snpsList(AppRequestHandler):
     def get(self):
-        self.setTemplate('sample.html')
+        self.setTemplate('snplist.html')
         snpids = snp.all()
         snpids.order("snpid")
         self.out({'snps':snpids})
+
+# Given a list of comma-seperated SNP cluster ids (example: "1805007,1805008")
+# this class queries for all the articles referenced from each of the SNP-ids and 
+# returns a list of dicts containing three values for each article:
+# - 'title' article
+# - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
+# - 'PMID' (PubMed ID) of article
+class pubmed(AppRequestHandler):
+    def get(self):
+        snp = self.request.get("snp")
+        if snp == "":
+            self.response.out.write("No snpId provided.")
+            return
+
+        # Query dbSNP for PMIDs of articles referenced by this SNP
+        handle = Entrez.elink(db="pubmed", dbfrom="snp", id=snp, linkname="snp_pubmed_cited")
+        dbs = Entrez.read(handle)
+        # print record
+        handle.close()
+
+        # no results to return
+        if len(dbs) == 0:
+            self.response.out.write("No referenced articles")
+            return
+        
+        # - should just be one, but for the hell of it, let's capture all the cases
+        ref_ids = [] # holds the id of each of the referened articles
+        
+        # for each database with references to this snp
+        for db in dbs:
+            if len(db["LinkSetDb"]) == 0:
+                continue               
+            # linkname="snp_pubmed_cited" means just one LinkSetDb - namely PubMed
+            for ref in db["LinkSetDb"][0]["Link"]:
+                ref_ids.append(ref['Id'])
+
+        # fetch all the articles with ids in ref_ids
+        handle = Entrez.efetch("pubmed", id=ref_ids, retmode="xml")
+        pubs = Entrez.read(handle)
+        handle.close()
+
+        # For each pubmed article, extract title, abstract and id (might not be in the same order as was queried)
+        articles = []
+        for pub in pubs:
+            # TODO: abstracts are somewhat grouped into labels:
+            # example - Background, Result and Conclusion
+            base_abs = pub["MedlineCitation"]["Article"]["Abstract"]["AbstractText"]
+            categories = []
+            for abstract in base_abs:
+                label = None
+                if hasattr(abstract, "attributes"):
+                   if abstract.attributes.has_key("Label"):
+                       label = abstract.attributes["Label"]
+
+                categories.append({
+                    "label" : label,
+                    "text" : abstract,
+                })
+
+            articles.append({
+                "title" : pub["MedlineCitation"]["Article"]["ArticleTitle"],
+                "abstracts": categories,
+                "pmid": pub["MedlineCitation"]["PMID"]
+            })
+
+        # print each article
+        self.setTemplate('pubmeds.html')
+        self.out({'pubmeds': articles})
 
 class dbSNP(AppRequestHandler):
     def get(self):
@@ -119,7 +187,8 @@ class Tag(AppRequestHandler):
 def main():
     application = webapp.WSGIApplication([('/', snpsList),
                                           ('/dbsnp/', dbSNP),
-                                          ('/tag/', Tag),
+                                          ('/pubmed/', pubmed),
+                                          ('/tag/', Tag)
                                           ], debug=True)
     util.run_wsgi_app(application)
 
