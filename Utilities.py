@@ -1,5 +1,5 @@
 from google.appengine.ext import webapp
-from Template import jTemplate
+from template import jTemplate
 
 class AppRequestHandler(webapp.RequestHandler):
     _template = "sample.html"
