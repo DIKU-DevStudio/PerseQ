@@ -8,7 +8,30 @@
 	<link href="/css/bootstrap-1.1.1.css" rel="stylesheet">
 	<script src="http://code.jquery.com/jquery-1.5.2.min.js"></script>
     <script src="http://autobahn.tablesorter.com/jquery.tablesorter.min.js"></script>
-    <script src="../bootstrap/js/google-code-prettify/prettify.js"></script>
+    <script src="/js/google-code-prettify/prettify.js"></script>
+    <script type="text/javascript">
+        function loadSnp(snp) {
+            var t = $("#bdy");
+            $("#dbSnp").click(function() {
+                t.attr('src', '/dbsnp/?snp='+snp);
+                $(this).parent().addClass("active").siblings('li').removeClass('active');
+            }).click();
+            $("#tags").click(function() {
+                t.attr('src', '/tag/?snp='+snp);
+                $(this).parent().addClass("active").siblings('li').removeClass('active');
+            });
+            $("#pubmed").click(function() {
+                t.attr('src', '/pubmed/?snp='+snp);
+                $(this).parent().addClass("active").siblings('li').removeClass('active');
+            });
+        }
+
+        $(document).ready(function() {
+            $(".snp").click(function() {
+                loadSnp($(this).text());
+            });
+        });
+    </script>
   </head>
 
   <body>
@@ -48,7 +71,7 @@
 			</br>
 			</br>
 			{% for snp in snps %}
-				<ul class="pills"><li><a href="/dbsnp/?snp={{snp.snpid}}" target="info">{{snp.snpid}}</a></li></ul>
+				<ul class="pills"><li><a href="javascript:void(0);" class="snp">{{snp.snpid}}</a></li></ul>
 			{% endfor %}
 		</div>
 
@@ -59,15 +82,16 @@
 			</br>
 			</br>
 			<ul class="tabs">
-			  <li class="active"><a href="#">Info1</a></li>
-			  <li><a href="#">Info2</a></li>
-			  <li><a href="#">Info3</a></li>
+			  <li class="active" id="dbSnp"><a href="#">dbSnp</a></li>
+			  <li><a href="#" id="pubmed">Pubmed</a></li>
+			  <li><a href="#" id="tags">Tags</a></li>
 			  <li><a href="#">Info4</a></li>
 			  <li><a href="#">Info5</a></li>
 			  <li><a href="#">Info6</a></li>
 			  <li><a href="#">Info7</a></li>
 			</ul>
-			<Iframe name="info" allowtransparency="true" width="520px" height="470px" frameborder="no"></Iframe></div>
+            <iframe id="bdy" style="width:600px;height:500px;overflow-y:scroll;" frameborder=0></iframe>
+        </div>
 		</div>
 		<div class="pagination">
 			<ul>

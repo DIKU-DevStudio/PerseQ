@@ -17,6 +17,8 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
+from Utilities import AppRequestHandler
+
 import jinja2
 from jinja2 import Environment, FileSystemLoader
 import os
@@ -32,15 +34,12 @@ Entrez.email = 'pamad05+entrez@gmail.com'
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
-
-class snpsList(webapp.RequestHandler):
+class snpsList(AppRequestHandler):
     def get(self):
-        t = e.get_template('snplist.html')
+        self.setTemplate('snplist.html')
         snpids = snp.all()
         snpids.order("snpid")
-        
-        self.response.out.write(t.render(snps = snpids))
+        self.out({'snps':snpids})
 
 # Given a list of comma-seperated SNP cluster ids (example: "1805007,1805008")
 # this class queries for all the articles referenced from each of the SNP-ids and 
@@ -48,7 +47,7 @@ class snpsList(webapp.RequestHandler):
 # - 'title' article
 # - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
-class pubmed(webapp.RequestHandler):
+class pubmed(AppRequestHandler):
     def get(self):
         snp = self.request.get("snp")
         if snp == "":
@@ -107,15 +106,16 @@ class pubmed(webapp.RequestHandler):
             })
 
         # print each article
-        t = e.get_template('pubmeds.html')        
-        self.response.out.write(t.render(pubmeds = articles))
+        self.setTemplate('pubmeds.html')
+        self.out({'pubmeds': articles})
 
-class dbSNP(webapp.RequestHandler):
+class dbSNP(AppRequestHandler):
     def get(self):
+        self.setTemplate('sample.html')
         snp = self.request.get("snp")
         if not snp:
             snp = "1805007"
-        
+
         res = Entrez.efetch("snp", id=snp, rettype="xml", retmode="text")
         dom = parseString(res.read())
 
@@ -124,15 +124,16 @@ class dbSNP(webapp.RequestHandler):
             rsid = node.getAttribute("rsId")
             print rsid
 
-        self.response.out.write(dom.toprettyxml())
-        # self.response.out.write(res.read().replace("\n","<br>"))
+        self.out({'msg':dom.toprettyxml()})
 
 
-class LookUpSNP(webapp.RequestHandler):
+class LookUpSNP(AppRequestHandler):
     def get(self):
+        self.setTemplate('hello.html')
+
         snp = self.request.get("snp")
         if len(snp) == 0:
-            self.response.out.write("No SNP title given (snp='')")
+            self.out({'msg':"No SNP title given (snp='')"})
             return
         site = wiki.Wiki("http://bots.snpedia.com/api.php")
         params = {
@@ -148,23 +149,46 @@ class LookUpSNP(webapp.RequestHandler):
         # if pageid == -1 <=> title=snp does not exist
         pageid = int(result['query']['pages'].keys()[0])
         if pageid == -1:
-            self.response.out.write("SNP title does not exist (NoPage)")
+            self.out({'msg':"No SNP title given (snp='')"})
             return
 
         # OMFG this is ugly..
-        self.response.out.write(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))
+        self.out({'msg':(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))})
 
-class TestJinja(webapp.RequestHandler):
+
+
+class Tag(AppRequestHandler):
     def get(self):
-        t = e.get_template('hello.html')
-        self.response.out.write(t.render(msg = 'Hello World!!!'))
+        # Get tags logic
+        self.setTemplate('autocomplete.html')
+        snpStr = self.request.get("snp")
+        snpObj = snp.gql("WHERE snpid = "+snpStr).get()
+        tags = domain_tag.all()
+        #tags = snpObj.tags
+        self.out({'tags':tags, 'snp':snpObj})
+    def post(self):
+        # Add tag logic
+        snpStr = self.request.get("snp")
+        tagStr = self.request.get("tag")
+        snpObj = snp.gql('WHERE snpid = '+snpStr).get()
+        tagObj = domain_tag.gql("WHERE tag = '"+tagStr+"'").get()
+        methodStr = self.request.get("method")
+
+        if methodStr == 'delete':
+            snpObj.domain_tags.remove(tagObj.key())
+        else:
+            snpObj.domain_tags.append(tagObj.key())
+        snpObj.put()
+
+        self.out();
+
 
 
 def main():
     application = webapp.WSGIApplication([('/', snpsList),
-                                          ('/test/', TestJinja),
                                           ('/dbsnp/', dbSNP),
-                                          ('/pubmed/', pubmed)
+                                          ('/pubmed/', pubmed),
+                                          ('/tag/', Tag)
                                           ], debug=True)
     util.run_wsgi_app(application)
 

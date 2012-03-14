@@ -1,7 +1,5 @@
-<html><head>
-    <title>{{msg}}</title>
-</head>
-<body>
-    <p>{{msg}}</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<pre>{{msg}}</pre>
+{% endblock %}
