@@ -17,8 +17,6 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from wikitools import wiki, page, api
-from Utilities import AppRequestHandler
-
 import jinja2
 from jinja2 import Environment, FileSystemLoader
 import os
@@ -34,12 +32,15 @@ Entrez.email = 'pamad05+entrez@gmail.com'
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-class snpsList(AppRequestHandler):
+e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
+
+class snpsList(webapp.RequestHandler):
     def get(self):
-        self.setTemplate('snplist.html')
+        t = e.get_template('snplist.html')
         snpids = snp.all()
         snpids.order("snpid")
-        self.out({'snps':snpids})
+        
+        self.response.out.write(t.render(snps = snpids))
 
 # Given a list of comma-seperated SNP cluster ids (example: "1805007,1805008")
 # this class queries for all the articles referenced from each of the SNP-ids and 
@@ -47,7 +48,7 @@ class snpsList(AppRequestHandler):
 # - 'title' article
 # - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
-class pubmed(AppRequestHandler):
+class pubmed(webapp.RequestHandler):
     def get(self):
         snp = self.request.get("snp")
         if snp == "":
@@ -59,6 +60,11 @@ class pubmed(AppRequestHandler):
         dbs = Entrez.read(handle)
         # print record
         handle.close()
+
+        # no results to return
+        if len(dbs) == 0:
+            self.response.out.write("No referenced articles")
+            return
         
         # - should just be one, but for the hell of it, let's capture all the cases
         ref_ids = [] # holds the id of each of the referened articles
@@ -70,11 +76,6 @@ class pubmed(AppRequestHandler):
             # linkname="snp_pubmed_cited" means just one LinkSetDb - namely PubMed
             for ref in db["LinkSetDb"][0]["Link"]:
                 ref_ids.append(ref['Id'])
-
-        # no results to return
-        if len(ref_ids) == 0:
-            self.response.out.write("No referenced articles")
-            return
 
         # fetch all the articles with ids in ref_ids
         handle = Entrez.efetch("pubmed", id=ref_ids, retmode="xml")
@@ -90,7 +91,6 @@ class pubmed(AppRequestHandler):
             categories = []
             for abstract in base_abs:
                 label = None
-
                 if hasattr(abstract, "attributes"):
                    if abstract.attributes.has_key("Label"):
                        label = abstract.attributes["Label"]
@@ -107,17 +107,15 @@ class pubmed(AppRequestHandler):
             })
 
         # print each article
-        self.setTemplate('pubmeds.html')
-        self.out({'pubmeds': articles})
+        t = e.get_template('pubmeds.html')        
+        self.response.out.write(t.render(pubmeds = articles))
 
-class dbSNP(AppRequestHandler):
+class dbSNP(webapp.RequestHandler):
     def get(self):
-        self.setTemplate('sample.html')
         snp = self.request.get("snp")
-        if snp == "":
-            self.out("Invalid SNP_id")
-            return
-
+        if not snp:
+            snp = "1805007"
+        
         res = Entrez.efetch("snp", id=snp, rettype="xml", retmode="text")
         dom = parseString(res.read())
 
@@ -129,13 +127,11 @@ class dbSNP(AppRequestHandler):
         self.out({'msg':dom.toprettyxml()})
 
 
-class LookUpSNP(AppRequestHandler):
+class LookUpSNP(webapp.RequestHandler):
     def get(self):
-        self.setTemplate('hello.html')
-
         snp = self.request.get("snp")
         if len(snp) == 0:
-            self.out({'msg':"No SNP title given (snp='')"})
+            self.response.out.write("No SNP title given (snp='')")
             return
         site = wiki.Wiki("http://bots.snpedia.com/api.php")
         params = {
@@ -151,44 +147,23 @@ class LookUpSNP(AppRequestHandler):
         # if pageid == -1 <=> title=snp does not exist
         pageid = int(result['query']['pages'].keys()[0])
         if pageid == -1:
-            self.out({'msg':"No SNP title given (snp='')"})
+            self.response.out.write("SNP title does not exist (NoPage)")
             return
 
         # OMFG this is ugly..
-        self.out({'msg':(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))})
+        self.response.out.write(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))
 
-
-class Tag(AppRequestHandler):
+class TestJinja(webapp.RequestHandler):
     def get(self):
-        # Get tags logic
-        self.setTemplate('autocomplete.html')
-        snpStr = self.request.get("snp")
-        snpObj = snp.gql("WHERE snpid = "+snpStr).get()
-        tags = domain_tag.all()
-        #tags = snpObj.tags
-        self.out({'tags':tags, 'snp':snpObj})
-    def post(self):
-        # Add tag logic
-        snpStr = self.request.get("snp")
-        tagStr = self.request.get("tag")
-        snpObj = snp.gql('WHERE snpid = '+snpStr).get()
-        tagObj = domain_tag.gql("WHERE tag = '"+tagStr+"'").get()
-        methodStr = self.request.get("method")
-
-        if methodStr == 'delete':
-            snpObj.domain_tags.remove(tagObj.key())
-        else:
-            snpObj.domain_tags.append(tagObj.key())
-        snpObj.put()
-
-        self.out();
+        t = e.get_template('hello.html')
+        self.response.out.write(t.render(msg = 'Hello World!!!'))
 
 
 def main():
     application = webapp.WSGIApplication([('/', snpsList),
+                                          ('/test/', TestJinja),
                                           ('/dbsnp/', dbSNP),
-                                          ('/pubmed/', pubmed),
-                                          ('/tag/', Tag)
+                                          ('/pubmed/', pubmed)
                                           ], debug=True)
     util.run_wsgi_app(application)
 
