@@ -16,6 +16,7 @@
 #
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+from google.appengine.api.datastore import Key
 from wikitools import wiki, page, api
 from utilities import AppRequestHandler
 
@@ -37,7 +38,7 @@ pp = pprint.PrettyPrinter(indent=4)
 class snpsList(AppRequestHandler):
     def get(self):
         self.setTemplate('snplist.html')
-        snpids = snp.all()
+        snpids = snp.all() #.filter("__key__ ==", Key.from_path("snp", "1805007"))
         snpids.order("snpid")
         self.out({'snps':snpids})
 
@@ -77,7 +78,7 @@ class pubmed(AppRequestHandler):
             return
 
         # fetch all the articles with ids in ref_ids
-        handle = Entrez.efetch("pubmed", id=ref_ids, retmode="xml")
+        handle = Entrez.efetch(db="pubmed", id=ref_ids, retmode="xml")
         pubs = Entrez.read(handle)
         handle.close()
 
