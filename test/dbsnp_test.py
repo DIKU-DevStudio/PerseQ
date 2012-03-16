@@ -48,7 +48,10 @@ snpids = [
 
 def init():
 	for id in snpids:
-		thissnp = snp(snpid=int(id))
+		orig = snp.get_or_insert(id, snpid=int(id))
+		if orig:
+			orig.snpid = int(id)
+			print orig
+			orig.put()
 		print 'adding ' + id
-   		thissnp.put()
-   
+   		
