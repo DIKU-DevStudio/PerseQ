@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<script type="text/javascript">
+    function loadSnp(snp) {
+        var t = $("#bdy");
+        $("#dbSnp").click(function() {
+            t.attr('src', '/dbsnp/?snp='+snp);
+            $(this).parent().addClass("active").siblings('li').removeClass('active');
+        }).click();
+        $("#tags").click(function() {
+            t.attr('src', '/tag/?snp='+snp);
+            $(this).parent().addClass("active").siblings('li').removeClass('active');
+        });
+        $("#pubmed").click(function() {
+            t.attr('src', '/pubmed/?snp='+snp);
+            $(this).parent().addClass("active").siblings('li').removeClass('active');
+        });
+    }
+
+    $(document).ready(function() {
+        $(".snp").click(function() {
+            loadSnp($(this).text());
+        });
+    });
+</script>
+
+{% endblock %}
+{% block content %}
+	<div class="row">
+        <div class="span4">
+            <ul class="pills">
+			{% for snp in snps %}
+		    	<li><a href="javascript:void(0);" class="snp">{{snp.snpid}}</a></li>
+            {% endfor %}
+            </ul>
+		</div>
+
+		<div class="span11">
+			<ul class="tabs">
+			  <li class="active" id="dbSnp"><a href="#">dbSnp</a></li>
+			  <li><a href="#" id="pubmed">Pubmed</a></li>
+			  <li><a href="#" id="tags">Tags</a></li>
+			  <li><a href="#">Info4</a></li>
+			  <li><a href="#">Info5</a></li>
+			  <li><a href="#">Info6</a></li>
+			  <li><a href="#">Info7</a></li>
+			</ul>
+            <iframe id="bdy" style="width:600px;height:500px;overflow-y:scroll;" frameborder=0></iframe>
+        </div>
+		</div>
+		<div class="pagination">
+			<ul>
+				<li class="prev disabled"><a href="#">&larr; Prev</a></li>
+				<li><a href="#">1</a></li>
+				<li><a href="#">2</a></li>
+				<li><a href="#">3</a></li>
+				<li><a href="#">4</a></li>
+				<li><a href="#">5</a></li>
+				<li class="disabled"><a href="#">...</a></li>
+				<li><a href="#">98</a></li>
+				<li><a href="#">99</a></li>
+				<li><a href="#">100</a></li>
+				<li><a href="#">101</a></li>
+				<li><a href="#">102</a></li>
+				<li class="next"><a href="#">Next &rarr;</a></li>
+			</ul>
+		</div>
+      
+{% endblock %}

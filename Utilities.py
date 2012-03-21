@@ -1,5 +1,5 @@
 from google.appengine.ext import webapp
-from template import jTemplate
+from Template import jTemplate
 
 from Bio import Entrez
 

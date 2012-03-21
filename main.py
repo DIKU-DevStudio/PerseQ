@@ -18,7 +18,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.api.datastore import Key
 from wikitools import wiki, page, api
-from utilities import AppRequestHandler
+from Utilities import AppRequestHandler
 
 import jinja2
 from jinja2 import Environment, FileSystemLoader
@@ -37,7 +37,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class snpsList(AppRequestHandler):
     def get(self):
-        self.setTemplate('snplist.html')
+        self.setTemplate('Main/snpsearch.html')
         snpids = snp.all() #.filter("__key__ ==", Key.from_path("snp", "1805007"))
         snpids.order("snpid")
         self.out({'snps':snpids})
@@ -63,11 +63,11 @@ class pubmed(AppRequestHandler):
 
         # - should just be one, but for the hell of it, let's capture all the cases
         ref_ids = [] # holds the id of each of the referened articles
-        
+
         # for each database with references to this snp
         for db in dbs:
             if len(db["LinkSetDb"]) == 0:
-                continue               
+                continue
             # linkname="snp_pubmed_cited" means just one LinkSetDb - namely PubMed
             for ref in db["LinkSetDb"][0]["Link"]:
                 ref_ids.append(ref['Id'])
@@ -106,12 +106,12 @@ class pubmed(AppRequestHandler):
             })
 
         # print each article
-        self.setTemplate('pubmeds.html')
+        self.setTemplate('data/pubmeds.html')
         self.out({'pubmeds': articles})
 
 class dbSNP(AppRequestHandler):
     def get(self):
-        self.setTemplate('sample.html')
+        self.setTemplate('data/dbsnp.html')
         snp = self.request.get("snp")
         if snp == "":
             self.out("No SNP_id provided")
@@ -130,7 +130,7 @@ class dbSNP(AppRequestHandler):
 
 class LookUpSNP(AppRequestHandler):
     def get(self):
-        self.setTemplate('hello.html')
+        self.setTemplate('data/snpedia.html')
 
         snp = self.request.get("snp")
         if len(snp) == 0:
@@ -160,7 +160,7 @@ class LookUpSNP(AppRequestHandler):
 class Tag(AppRequestHandler):
     def get(self):
         # Get tags logic
-        self.setTemplate('autocomplete.html')
+        self.setTemplate('Main/autocomplete.html')
         snpStr = self.request.get("snp")
         snpObj = snp.gql("WHERE snpid = "+snpStr).get()
         tags = domain_tag.all()
