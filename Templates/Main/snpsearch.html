@@ -15,7 +15,9 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="dbsnp">
-                <h1>HAI dbSNP!<a href="#dbsnp" onclick="$('#dbsnp').load('/dbsnp/?snp='+$('#snpid').val());" class="btn">Load!</a></h1>
+                <h1>HAI dbSNP!<a href="#dbsnp" onclick="$('#dbsnp').load('/dbsnp/?snp='+$('#snpid').val(), function() {
+                        prettyPrint();
+                        });" class="btn">Load!</a></h1>
             </div>
             <div class="tab-pane" id="pubmed">
                 <h1>HAI pubmed!<a href="#pubmed" onclick="$('#pubmed').load('/pubmed/?snp='+$('#snpid').val());" class="btn">Load!</a></h1>
