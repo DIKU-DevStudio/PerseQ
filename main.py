@@ -17,14 +17,18 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
-from Controllers import mainController, databaseController, taggingController
+#from Controllers import * # mainController, databaseController, taggingController
+import logging
+import Controllers
 
 def main():
-    application = webapp.WSGIApplication([('/', mainController.snpsList),
-                                          ('/dbsnp/', databaseController.dbSNP),
-                                          ('/pubmed/', databaseController.pubmed),
-                                          ('/tag/', taggingController.addTag)
-                                          ], debug=True)
+    logging.error(Controllers.__routes__)
+    application = webapp.WSGIApplication(Controllers.__routes__,
+                                         #[('/', mainController.snpsList),
+                                         # ('/dbsnp/', databaseController.dbSNP),
+                                         # ('/pubmed/', databaseController.pubmed),
+                                         # ('/tag/', taggingController.addTag)],
+                                        debug=True)
     util.run_wsgi_app(application)
 
 if __name__ == '__main__':

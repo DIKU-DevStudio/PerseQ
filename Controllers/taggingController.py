@@ -1,3 +1,4 @@
+
 from Utilities import AppRequestHandler
 from Models.snp import snp
 from Models.snp_url import snp_url
@@ -28,4 +29,4 @@ class addTag(AppRequestHandler):
 
         self.out();
 
-
+__routes__ = [('/tag/', addTag)]

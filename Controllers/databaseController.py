@@ -3,6 +3,7 @@
 # 
 #
 ###
+
 from Utilities import AppRequestHandler
 from Bio import Entrez
 from xml.dom.minidom import parseString
@@ -120,3 +121,8 @@ class LookUpSNP(AppRequestHandler):
 
         # OMFG this is ugly..
         self.out({'msg':(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))})
+
+
+
+__routes__ = [('/dbsnp/',  dbSNP),
+              ('/pubmed/', pubmed)]
