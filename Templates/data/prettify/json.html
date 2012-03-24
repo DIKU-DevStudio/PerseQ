@@ -1,0 +1,4 @@
+{% extends "data/prettify/prettify.html" %}
+{% block code %}
+<code class="lang-json">{{json.replace('<','&lt;')}}</code>
+{% endblock %}

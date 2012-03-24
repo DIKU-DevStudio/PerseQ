@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script type="text/javascript">
+    function loadSnp() {
+        var snp = $('#snpid').val();
+        var loading = 'Loading ...';
+        $('#dbsnp').html(loading).load('/dbsnp/?snp='+snp, function() {
+            prettyPrint();
+        });
+        $('#pubmed').html(loading).load('/pubmed/?snp='+snp);
+        $('#tags').html(loading).load('/tag/?snp='+snp);
+    }
+</script>
+{% endblock %}
+{% block content %}
+    <form class="well" action="" onsubmit="loadSnp(); return false;">
+        <input type="text" class="search-query span2" placeholder="Search" id="snpid" value="Rs9939609">
+        <a href="#" onclick="javascript:loadSnp()" class="btn">Load</a>
+    </form>
+    <div class="tabbable">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#dbsnp" data-toggle="tab">dbSnp</a></li>
+            <li><a href="#pubmed" data-toggle="tab">Pubmed</a></li>
+            <li><a href="#tags" data-toggle="tab">Tags</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="dbsnp">
+                <h1>HAI dbSNP!</h1>
+            </div>
+            <div class="tab-pane" id="pubmed">
+                <h1>HAI pubmed!</h1>
+            </div>
+            <div class="tab-pane" id="tags">
+                <h1>HAI tagging!</h1>
+            </div>
+        </div>
+    </div>
+{% endblock %}
