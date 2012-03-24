@@ -3,7 +3,7 @@
 # 
 #
 ###
-import Utilities
+from Utilities import AppRequestHandler
 from Bio import Entrez
 from xml.dom.minidom import parseString
 
@@ -14,7 +14,7 @@ Entrez.email = 'pamad05+entrez@gmail.com'
 # - 'title' article
 # - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
-class pubmed(Utilities.AppRequestHandler):
+class pubmed(AppRequestHandler):
     def get(self):
         self.setTemplate('data/pubmeds.html')
         snp = self.request.get("snp")
@@ -75,7 +75,7 @@ class pubmed(Utilities.AppRequestHandler):
         # print each article
         self.out({'pubmeds': articles})
 
-class dbSNP(Utilities.AppRequestHandler):
+class dbSNP(AppRequestHandler):
     def get(self):
         snp = self.request.get("snp")
         if snp == "":
@@ -93,7 +93,7 @@ class dbSNP(Utilities.AppRequestHandler):
         self.toXML(dom.toprettyxml(), True)
 
 
-class LookUpSNP(Utilities.AppRequestHandler):
+class LookUpSNP(AppRequestHandler):
     def get(self):
         self.setTemplate('data/snpedia.html')
 

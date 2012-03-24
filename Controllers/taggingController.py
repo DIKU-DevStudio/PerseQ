@@ -1,9 +1,9 @@
-import Utilities
+from Utilities import AppRequestHandler
 from Models.snp import snp
 from Models.snp_url import snp_url
 from Models.domain_tag import domain_tag
 
-class addTag(Utilities.AppRequestHandler):
+class addTag(AppRequestHandler):
     def get(self):
         # Get tags logic
         self.setTemplate('Main/autocomplete.html')
