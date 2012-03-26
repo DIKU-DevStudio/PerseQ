@@ -20,7 +20,7 @@ class pubmed(AppRequestHandler):
         self.setTemplate('data/pubmeds.html')
         snp = self.request.get("snp")
         if snp == "":
-            self.out("No SNP id provided.")
+            self.out({'msg':"No SNP id provided."})
             return
 
         # Query dbSNP for PMIDs of articles referenced by this SNP
