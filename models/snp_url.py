@@ -1,5 +1,5 @@
 from google.appengine.ext import db
-from snp import snp
+from models.snp import snp
 # SNP URLS (one to many) -
 #   this is created by the snp_url 
 
