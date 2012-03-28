@@ -1,8 +1,8 @@
 
 from Utilities import AppRequestHandler
-from Models.snp import snp
-from Models.snp_url import snp_url
-from Models.domain_tag import domain_tag
+from models.snp import snp
+from models.snp_url import snp_url
+from models.domain_tag import domain_tag
 
 class addTag(AppRequestHandler):
     def get(self):
