@@ -2,8 +2,19 @@
 
 {% block head %}
 <script type="text/javascript">
+    function isNumber(n) {
+          return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    function omnify() {
+        var search = $('#search').val();
+        if(search.slice(0,2).toLowerCase() == 'rs' || isNumber(search))  {
+            loadSnp();
+        } else {
+            alert('OmniSearch doesn\'t know what to do with your query');
+        }
+    }
     function loadSnp() {
-        var snp = $('#snpid').val();
+        var snp = $('#search').val();
         var loading = 'Loading ...';
         $('#dbsnp').html(loading).load('/dbsnp/?snp='+snp, function() {
             prettyPrint();
@@ -14,9 +25,11 @@
 </script>
 {% endblock %}
 {% block content %}
-    <form class="well" action="" onsubmit="loadSnp(); return false;">
-        <input type="text" class="search-query span2" placeholder="Search" id="snpid" value="Rs9939609">
-        <a href="#" onclick="javascript:loadSnp()" class="btn">Load</a>
+<form class="well" action="" onsubmit="omnify(); return false;">
+        <p>Search for diseases, SNPs, genes or tags.
+           <small>For instance try &quot;Rs1815739&quot;</small></p>
+        <input type="text" class="search-query span4" placeholder="OmniSearch" id="search">
+        <!--<a href="#" onclick="javascript:loadSnp()" class="btn">Load</a>-->
     </form>
     <div class="tabbable">
         <ul class="nav nav-tabs">
