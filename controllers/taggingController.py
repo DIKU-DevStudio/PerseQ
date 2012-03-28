@@ -7,7 +7,6 @@ from models.domain_tag import domain_tag
 class addTag(AppRequestHandler):
     def get(self):
         # Get tags logic
-        self.setTemplate('Main/autocomplete.html')
         snpStr = self.request.get("snp")
         snpObj = snp.gql("WHERE snpid = '"+snpStr+"'").get()
         tags = domain_tag.all()
