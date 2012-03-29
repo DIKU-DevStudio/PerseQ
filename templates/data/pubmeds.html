@@ -1,4 +1,4 @@
-<span class="label label-important">{{error}}</span>
+{% if error %}<span class="label label-important">{{error}}</span>{% endif %}
 <p>{{msg}}</p>
 {% for pub in pubmeds %}
 	<p>
