@@ -3,7 +3,7 @@ from google.appengine.ext import db
 # SNP models:
 class snp(db.Model):
     # The essential information
-    snpid = db.IntegerProperty()
+    snpid = db.StringProperty()
     magnitude = db.FloatProperty()
 
     # The raw SNP pattern - optional?
