@@ -2,6 +2,7 @@ from google.appengine.ext import webapp
 from jinja2 import Environment, FileSystemLoader
 import os
 import json
+import inspect
 
 from Bio import Entrez
 
@@ -34,7 +35,7 @@ def omim_efetch(db=None, ids=None):
     print pubs
 
 class jTemplate():
-    _e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'Templates')))
+    _e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
 
     @staticmethod
     def render(template, variables, printer):
@@ -42,15 +43,17 @@ class jTemplate():
         printer(t.render(variables))
 
 class AppRequestHandler(webapp.RequestHandler):
-    _template = "base.html"
+    _template = None
 
     def setTemplate(self, template):
         self._template = template
 
-    def out(self, dictionary = {}, template = None):
-        if(template == None):
-            template = self._template
-        jTemplate.render(template, dictionary, self.response.out.write)
+    def out(self, dictionary = {}):
+        if(self._template == None):
+            # Get template from controller / method names
+            actionName = self.__class__.__name__
+            self._template = actionName+".html"
+        jTemplate.render(self._template, dictionary, self.response.out.write)
 
     def toJson(self, dictionary, prettify = False):
         data = {"json": json.dumps(dictionary)}
