@@ -51,9 +51,8 @@ class AppRequestHandler(webapp.RequestHandler):
     def out(self, dictionary = {}):
         if(self._template == None):
             # Get template from controller / method names
-            actionName = get_class_from_frame(inspect.stack()[1][0]).__name__
-            ctrlName = inspect.stack()[1][1].split('/')[-1].split('Controller.py')[0]
-            self._template = ctrlName+"/"+actionName+".html"
+            actionName = self.__class__.__name__
+            self._template = actionName+".html"
         jTemplate.render(self._template, dictionary, self.response.out.write)
 
     def toJson(self, dictionary, prettify = False):
@@ -69,16 +68,3 @@ class AppRequestHandler(webapp.RequestHandler):
             jTemplate.render("data/prettify/xml.html", data, self.response.out.write);
         else:
             jTemplate.render("data/xml.html", data,self.response.out.write );
-
-def get_class_from_frame(fr):
-    args, _, _, value_dict = inspect.getargvalues(fr)
-    # we check the first parameter for the frame function is
-    # named 'self'
-    if len(args) and args[0] == 'self':
-        # in that case, 'self' will be referenced in value_dict
-        instance = value_dict.get('self', None)
-        if instance:
-            # return its class
-            return getattr(instance, '__class__', None)
-    # return None otherwise
-    return None
