@@ -35,6 +35,10 @@
         </div>
 
         <div id="content" class="container">
+            {% if error %}
+                <span class="label label-important">{{error}}</span>
+            {% endif %}
+
             {% block content %}
             {% endblock %}
         </div>
