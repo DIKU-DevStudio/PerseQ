@@ -21,7 +21,7 @@ import logging
 import controllers
 
 def main():
-    logging.info("Active routes: "+str(controllers.__routes__))
+    #logging.info("Active routes: "+str(controllers.__routes__))
     application = webapp.WSGIApplication(controllers.__routes__,
                                          debug=True)
     util.run_wsgi_app(application)
