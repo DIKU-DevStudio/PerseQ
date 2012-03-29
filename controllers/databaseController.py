@@ -20,7 +20,7 @@ class pubmed(AppRequestHandler):
         self.setTemplate('data/pubmeds.html')
         snp = self.request.get("snp")
         if snp == "":
-            self.out({'msg':"No SNP id provided."})
+            self.out({'error':"No SNP id provided."})
             return
 
         # Query dbSNP for PMIDs of articles referenced by this SNP
@@ -80,7 +80,7 @@ class dbSNP(AppRequestHandler):
     def get(self):
         snp = self.request.get("snp")
         if snp == "":
-            self.out("No SNP_id provided")
+            self.out({'error':'No SNP_id provided'})
             return
 
         res = Entrez.efetch("snp", id=snp, rettype="xml", retmode="text")
@@ -100,7 +100,7 @@ class LookUpSNP(AppRequestHandler):
 
         snp = self.request.get("snp")
         if len(snp) == 0:
-            self.out({'msg':"No SNP title given (snp='')"})
+            self.out({'error':"No SNP title given (snp='')"})
             return
         site = wiki.Wiki("http://bots.snpedia.com/api.php")
         params = {
@@ -116,7 +116,7 @@ class LookUpSNP(AppRequestHandler):
         # if pageid == -1 <=> title=snp does not exist
         pageid = int(result['query']['pages'].keys()[0])
         if pageid == -1:
-            self.out({'msg':"No SNP title given (snp='')"})
+            self.out({'error':"No SNP title given (snp='')"})
             return
 
         # OMFG this is ugly..
