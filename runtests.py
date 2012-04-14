@@ -16,8 +16,6 @@ def main(test_path):
     sys.path.insert(0, "/usr/local/google_appengine")
     import dev_appserver
     dev_appserver.fix_sys_path()
-    for l in sys.path:
-        print l
     suite = unittest2.loader.TestLoader().discover(test_path)
     unittest2.TextTestRunner(verbosity=2).run(suite)
 
