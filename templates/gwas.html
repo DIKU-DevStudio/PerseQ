@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set d = 0 %}
+{% set trait = 0 %}
+{% set study = '0' %}
+{% for item in gwasList %}
+    {% if item.Study != study or item['Disease/Trait'] != trait or item.Date != d %}
+        {% if d != 0 %}
+            </tbody></table>
+            </div>
+            </article>
+        {% endif %}
+        {% set study = item.Study %}
+        {% set trait = item['Disease/Trait'] %}
+        {% set d = item.Date %}
+        <article class="row">
+        <time class="span1">{{item.Date}}</time>
+        <div class="span10">
+        <h3>{{item['Disease/Trait']}}</h3>
+        <h3><small>{{item.Study}}</small></h3>
+        <p><a href="{{item.Link}}" class="btn btn-mini">View #{{item.PUBMEDID}} on pubmed</a></p>
+        <table class="table"><thead><tr>
+                    <th class="span3">Gene(s)</th>
+                    <th>SNPs</th>
+                    <th class="span2">p-value</th>
+                </tr></thead><tbody>
+    {% endif %}
+    <tr>
+        <td>{{item['Reported Gene(s)']}} ({{item.Snp_gene_ids}})<br /><sub>&darr;: {{item['Downstream_gene_id']}} &uarr;:{{item['Upstream_gene_id']}}</sub></td>
+        <td>{% for snp in item.SNPs.split(', ') %}
+            <a href="/search/?q={{snp}}">{{snp}}</a> 
+            {% endfor %}</td>
+        <td>{{item['p-Value']}}</td>
+    </tr>
+    {% endfor %}
+</tbody></table>
+</div>
+</article>
+
+<p>Postgame dump:</p>
+<pre>
+{{gwasList[0]}}
+</pre>
+{% endblock %}
