@@ -1,0 +1,22 @@
+.nav .box {
+    width: 128px;
+    padding-top: 128px;
+    text-align: center;
+    vertical-align: bottom;
+    border: 1px solid #eee;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+
+.box.search {
+    background-image:url('/img/search.png');
+}
+.box.upload {
+    background-image:url('/img/upload.png');
+}
+.box.categories {
+    background-image:url('/img/categories.png');
+}
+.box.journal {
+    background-image:url('/img/journal.png');
+}

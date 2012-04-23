@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+<div style="text-align:center;margin:0px auto;">
+    <p>Welcome to <a href="/">PerseQ</a>. Choose a path below.</p>
+<ul class="nav nav-pills" style="display:inline-block;">
+    <li><a href="/search/"   class="box search">OmniSearch</a></li>
+    <li><a href="/gwas/" class="box categories">Browse diseases</a></li>
+    <li><a href="/mysnps/"   class="box journal">My Sequences</a></li>
+    <li><a href="/upload/"   class="box upload">Upload sequence</a></li>
+</ul>
+</div>
+
+{% endblock %}
