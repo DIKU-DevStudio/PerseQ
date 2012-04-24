@@ -9,7 +9,7 @@ class snpSearch(AppRequestHandler):
     def get(self):
         snpids = snp.all()
         snpids.order("snpid")
-        self.out({'snps':snpids})
+        self.out({'snps':snpids, 'search':self.request.get("q")})
 
 class dashboard(AppRequestHandler):
     def get(self):
