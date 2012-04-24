@@ -1,0 +1,28 @@
+test typing in a snp to search
+	1. click through to search page
+	2. enter sample SNP
+	3. click search
+	4. see results
+(test typing in nonsense)
+(test automatic parsing of numbers/prefixes)
+(test metadata filtering abilities)
+
+test viewing a SNP
+(ability to view paper abstracts)
+(ability to sort by freshness, citations)
+
+
+test categories
+ (view a list of categories)
+ (add category)
+
+
+test upload
+sample text file with a few snps
+how are results presented? list of snp search links or a summary view?
+
+
+test journal
+(do some searches - should be in journal under recent list)
+(bookmarking of SNPs)
+(feeds of activity) 
