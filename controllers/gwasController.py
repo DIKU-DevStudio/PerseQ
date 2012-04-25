@@ -16,4 +16,15 @@ class gwasReader(AppRequestHandler):
 
         self.out({'gwasList': text[:100]})
 
-__routes__ = [('/gwas/', gwasReader)]
+class studyPresenter(AppRequestHandler):
+    def get(self, i):
+        self.setTemplate('study.html')
+        reader = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
+        text = []
+        for row in reader:
+            if row['PUBMEDID'] == i:
+                text.append(row)
+        self.out({'gwasList':text})
+
+__routes__ = [('/gwas/', gwasReader),
+              ('/study/(.*)', studyPresenter)]

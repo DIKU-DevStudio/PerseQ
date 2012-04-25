@@ -22,15 +22,20 @@
         $('#pubmed').html(loading).load('/pubmed/?snp='+snp);
         $('#tags').html(loading).load('/tag/?snp='+snp);
     }
+    {% if search %}
+    $(document).ready(function() {
+       omnify();     
+    });
+    {% endif %}
 </script>
 {% endblock %}
 {% block content %}
 <form class="well" action="" onsubmit="omnify(); return false;">
-        <p>Search for diseases, SNPs, genes or tags.
-           <small>For instance try &quot;Rs1815739&quot;</small></p>
-        <input type="text" class="search-query span4" placeholder="OmniSearch" id="search">
+    <p>Search for diseases, SNPs, genes or tags.
+    <small>For instance try &quot;Rs1815739&quot;</small></p>
+    <input type="text" class="search-query span4" placeholder="OmniSearch" id="search" value="{{search if search}}" />
         <!--<a href="#" onclick="javascript:loadSnp()" class="btn">Load</a>-->
-    </form>
+</form>
     <div class="tabbable">
         <ul class="nav nav-tabs">
             <li class="active"><a href="#dbsnp" data-toggle="tab">dbSnp</a></li>

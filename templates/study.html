@@ -1,0 +1,38 @@
+{% extends 'gwas.html' %}
+
+{% block maturity %}
+
+<div id="maturityRating" class="row" style="height:12em">
+    <div class="span2 well">
+        <h1><small>Rating</small></h1>
+        <h1>5.8/10.0</h1>
+    </div>
+    <div class="span8">
+        <div class="alert">
+        <strong>Warning!</strong> The chosen study has not been reviewed, or has received poor reviews.
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block comments %}
+
+<div id="comments" class="" style="padding-left:30px;border:1px solid #eee;">
+    <h3 id="comments-title">2 Comments</h3>
+    <ol class="commentlist" style="margin-left:0;list-style:none;">
+        <li class="row">
+        <div class="span2"><img src="/img/person.png" style="float:left; padding: 5px;"/> <time>03/04-2012</time><br /><a href="#">Jacob Wejendorp</a>
+        </div>
+            <div class="span9"><p>This study seems awesome!</p></div>
+        </li>
+        <li class="row" style="padding-left:20px;background-color:#eee;">
+        <div class="span2"><img src="/img/person.png" style="float:left; padding: 5px;"/> <time>03/04-2012</time><br /><a href="#">Jens Raaby</a>
+        </div>
+            <div class="span9"><p>I beg to differ, the sample sizes are not big enough for the reported p-Values with the chosen platform.</p></div>
+        </li>
+    </ol>
+
+</div>
+{% endblock %}
