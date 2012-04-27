@@ -6,6 +6,86 @@ import inspect
 
 from Bio import Entrez
 
+"""
+Date Added to Catalog
+PUBMEDID
+First Author
+Date
+Journal
+Link
+Study
+Disease_Trait
+Initial Sample Size
+Replication Sample Size
+Region
+Chr_id
+Chr_pos
+Reported Gene(s)
+Mapped_gene Upstream_gene_id
+Downstream_gene_id
+Snp_gene_ids
+Upstream_gene_distance
+Downstream_gene_distance
+Strongest SNP-Risk Allele
+SNPs
+Merged
+Snp_id_current
+Context
+Intergenic
+Risk Allele Frequency
+p-Value
+Pvalue_mlog
+p-Value (text)
+OR or beta
+95\% CI (text)
+Platform [SNPs passing QC]
+CNV"""
+from models.study import Study, GWAS, Gene, Snp
+import csv
+def import_gwas(path="gwascatalog.txt"):
+    docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
+    pubids = {}
+    for doc in docs:
+        pubid = doc["PUBMEDID"]
+        if pubids.has_key(pubid):
+            pubids[pubid].append(doc)
+        else:
+            pubids[pubid] = [doc]
+
+    for pid, gwas in pubids.iteritems():
+        rel = gwas[0]
+        print pid
+        study = Study.get_or_insert(pid, 
+            name=rel["Study"],
+            pubmed_url=rel["Link"],
+            init_sample = rel["Initial Sample Size"],
+            repl_sample= rel["Replication Sample Size"],
+            platform = rel["Platform [SNPs passing QC]"],
+            disease_trait = rel["Disease/Trait"],
+            pubmed_id = pid)
+            
+        for rel in gwas:
+            # init gene relation
+            if rel["Intergenic"] == "1":
+                gene = Gene.get_or_insert(rel["Snp_gene_ids"].strip(),
+                    name = rel["Mapped_gene"],
+                    geneid = rel["Snp_gene_ids"])
+                gene.studies.append(study.key())
+                gene.put()
+
+            # init snps..
+            if rel["Snp_id_current"] != "":
+                snp = Snp.get_or_insert(rel["Snp_id_current"],
+                    snpid=rel["Snp_id_current"])
+                if rel["Intergenic"] == "1":
+                    snp.gene = gene.key()
+                snp.studies.append(study.key())
+            # maybe an if here, to check or overwriting?
+                snp.put()
+
+
+
+
 # given list of snpids - returns the list of related OMIM IDs
 def snp_omim(snpids=None):
     if not snpids:
@@ -41,6 +121,8 @@ class jTemplate():
     def render(template, variables, printer):
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
+
+
 
 class AppRequestHandler(webapp.RequestHandler):
     _template = None
