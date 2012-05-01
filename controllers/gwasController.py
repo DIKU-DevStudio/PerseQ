@@ -2,7 +2,7 @@
 # Controller for main presentation
 #
 ###
-from Utilities import AppRequestHandler
+from util import AppRequestHandler
 import csv
 from StringIO import StringIO
 
