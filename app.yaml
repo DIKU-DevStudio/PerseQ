@@ -12,7 +12,10 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-
+- url: /admin/.*
+  script: admin.py
+  login: admin
+  
 - url: /css
   static_dir: bootstrap/css
 - url: /js
