@@ -23,7 +23,8 @@ Region
 Chr_id
 Chr_pos
 Reported Gene(s)
-Mapped_gene Upstream_gene_id
+Mapped_gene
+Upstream_gene_id
 Downstream_gene_id
 Snp_gene_ids
 Upstream_gene_distance
@@ -44,7 +45,7 @@ Platform [SNPs passing QC]
 CNV"""
 from models.study import Study, GWAS, Gene, Snp
 import csv
-def import_gwas(path="gwascatalog.txt"):
+def populate(path="gwascatalog.txt"):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
     pubids = {}
     for doc in docs:
@@ -54,9 +55,14 @@ def import_gwas(path="gwascatalog.txt"):
         else:
             pubids[pubid] = [doc]
 
+    limit = 300
+    i = 0
     for pid, line in pubids.iteritems():
+        i += 1
+        if i == limit:
+            break
         rel = line[0]
-        print pid
+        # print pid
         study = Study.get_or_insert(pid, 
             name=rel["Study"],
             pubmed_url=rel["Link"],
@@ -69,40 +75,101 @@ def import_gwas(path="gwascatalog.txt"):
         for rel in line:
             # init gene relation
             gene = None
-            if rel["Intergenic"] == "1":
-                gene = Gene.get_or_insert(rel["Snp_gene_ids"].strip(),
-                    name = rel["Mapped_gene"],
-                    geneid = rel["Snp_gene_ids"])
-                gene.studies.append(study.key())
-                gene.put()
+            up_gene = None
+            down_gene = None
+
+            # if intergenic gwas, we go nuts..
+            intergenic = rel["Intergenic"] == "2"
+
+            if not intergenic:
+                geneid = rel["Snp_gene_ids"].strip()
+                if geneid != "":
+                # not intergenic => one direct gene
+                    names = rel["Mapped_gene"].split(" - ")
+                    if len(names) == 1:
+                        gene = Gene.get_or_insert(rel["Snp_gene_ids"].strip(),
+                            name = rel["Mapped_gene"],
+                            geneid = rel["Snp_gene_ids"])
+
+                        gene.studies.append(study.key())
+                        gene.put()
+            else:
+                # up and downstream genes must be set
+                down_id = rel["Downstream_gene_id"].strip()
+                up_id = rel["Upstream_gene_id"].strip() 
+
+                if up_id != "" and down_id != "":
+                    up_down_names = rel["Mapped_gene"].split(" - ")
+                    if len(up_down_names) < 2:
+                        # gene = NR / NS or whatever..
+                        up_down_names = ["N/A", "N/A"]
+                    
+                    # create upstream gene
+                    up_name = up_down_names[0]
+                    down_name = up_down_names[1]
+                    print down_name, up_name
+                    # assert("-" not in up_name)
+                    # assert("-" not in down_name)
+
+                    assert(up_id != "")
+                    assert(down_id != "")
+
+                    up_gene = Gene.get_or_insert(up_id,
+                        name = up_name, 
+                        geneid = up_id)
+                    # up_gene.study.append(study.key())
+                    down_gene = Gene.get_or_insert(down_id,
+                        name = down_name, 
+                        geneid = down_id)
+                    # up_gene.study.append(study.key())
 
             # init snps..
             snp = None
             if rel["Snp_id_current"] != "":
-                snp = Snp.get_or_insert(rel["Snp_id_current"],
-                    snpid=rel["Snp_id_current"])
-                if rel["Intergenic"] == "1":
+                # non=blank snp
+                snpid = rel["Snp_id_current"].strip()
+
+                snp = Snp.get_or_insert(snpid,
+                    snpid=snpid)
+                if gene:
                     snp.gene = gene.key()
                 snp.studies.append(study.key())
-            # maybe an if here, to check or overwriting?
+            # maybe an if here, to check for overwriting?
                 snp.put()
+            
+            # init gwas relation
+            gwas = GWAS(study=study.key(), intergenic=intergenic)
+            if intergenic:
+                if down_gene and up_gene:
+                    gwas.downstream = down_gene.key()
+                    gwas.upstream = up_gene.key()
+            else:
+                if gene:
+                    gwas.gene = gene.key()
 
-            gwas = GWAS(study=study.key())
-            if gene:
-                gwas.gene = gene.key()
+            # parse remaining gwas information
             gwas.p_string = rel["p-Value"]
+            gwas.snps = rel["Snp_id_current"].strip()
+            # parse out the exponent: 6E-8 => -8
             try:
-                int(rel["p-Value"])
+                # test that p-Value is actually a float before parsing out
+                float(rel["p-Value"])
                 gwas.p_val = int(rel["p-Value"].split("E")[1])    
             except Exception, e:
+                print e
+                # forces the filter to downgrade this gwas wrt. p-value
                 gwas.p_val = 0
-            gwas.OR_beta = rel["OR or beta"]
-            gwas.riscAlleleFrequency = rel["Risk Allele Frequency"]
-            gwas.intergenic = rel['Intergenic'] == '2'
+            # could be interesting
+            gwas.strongest_snp_risk_allele = \
+                rel["Strongest SNP-Risk Allele"].strip()
+            gwas.OR_beta = rel["OR or beta"].strip()
+            gwas.riscAlleleFrequency = \
+                rel["Risk Allele Frequency"].strip()
+
             gwas.put()
     print "done"
 
-def tear_down():
+def purge():
     for model in ["Snp", "Gene", "GWAS", "Study"]:
         try:
             while True:

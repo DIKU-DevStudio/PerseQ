@@ -28,6 +28,7 @@
                     <th class="span2">Intergenic</th>
                     <th class="span1">Odds Ratio</th>
                     <th class="span1">p&#8209;Value</th>
+                    <th class="span1">Allele Freq.</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,18 +37,20 @@
                 {% if gwas.gene %}
                     &raquo; {{gwas.gene.name}}
                 {% else %}
-                    &uarr; {{gwas.upstream}}
-                    &darr; {{gwas.downstream}}
+                    &uarr; {{gwas.upstream.name}}
+                    &darr; {{gwas.downstream.name}}
                 {% endif %}
             {% endmacro %}
             <tr>
                 <td>{{geneName()}}</td>
-                <td>{% for snp in gwas.snps %}
-                    <a href="/search/?q={{snp.snpid}}">{{snp.snpid}}</a>
-                    {% endfor %}</td>
+                <td>
+                    <a href="/search/?q={{gwas.snps}}">{{gwas.snps}}
+                    </a>
+                </td>
                 <td>{{gwas.intergenic}}</td>
                 <td>{{gwas.OR_beta}}</td>
                 <td>{{gwas.p_val}}</td>
+                <td>{{gwas.riscAlleleFrequency}}</td>
             </tr>
         {% endfor %}
             </tbody>

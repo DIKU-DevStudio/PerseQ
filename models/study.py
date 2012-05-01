@@ -29,8 +29,8 @@ class Study(db.Model):
 class Gene(db.Model):
     studies = db.ListProperty(db.Key) # or simply pubmed_ids..
     alias = db.StringListProperty()
-    name = db.StringProperty(required=True)
-    geneid = db.StringProperty()
+    name = db.StringProperty()
+    geneid = db.StringProperty(required=True)
 
 # id = SNPID
 class Snp(db.Model):
@@ -49,15 +49,15 @@ class GWAS(db.Model):
             collection_name='gwas')
 
     # if the snp is _in_ a specific gene - this is the id
-    gene = db.ReferenceProperty(Gene)
+    gene = db.ReferenceProperty(Gene, collection_name="gene")
     # if not, these two contain the reference-ids
-    upstream = db.StringProperty()
-    downstream = db.StringProperty()
+    upstream = db.ReferenceProperty(Gene, collection_name="upstream")
+    downstream = db.ReferenceProperty(Gene, collection_name="downstream")
     # upstream = db.ReferenceProperty(Gene, )
     # downstream = db.ReferenceProperty(Gene)
 
-    # snp ids.. 
-    snps = db.ListProperty(db.Key)
+    # snp ids..
+    snps = db.StringProperty()
     # 27 - # 6 * 10^-8
     p_string = db.StringProperty()
     # 6 * 10^-8 => p_val = -8
@@ -67,5 +67,7 @@ class GWAS(db.Model):
     OR_beta = db.StringProperty()
     # 26 - #.##
     riscAlleleFrequency = db.StringProperty()
+    # Strongest SNP-Risk Allele
+    strongest_snp_risk_allele = db.StringProperty()
     # 25 - 1=no, 2=yes
     intergenic = db.BooleanProperty()
