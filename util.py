@@ -2,7 +2,9 @@ from google.appengine.ext import webapp
 from jinja2 import Environment, FileSystemLoader
 import os
 import json
-import inspect
+# import inspect
+import logging
+from google.appengine.ext import db
 
 from Bio import Entrez
 
@@ -52,8 +54,8 @@ def import_gwas(path="gwascatalog.txt"):
         else:
             pubids[pubid] = [doc]
 
-    for pid, gwas in pubids.iteritems():
-        rel = gwas[0]
+    for pid, line in pubids.iteritems():
+        rel = line[0]
         print pid
         study = Study.get_or_insert(pid, 
             name=rel["Study"],
@@ -64,8 +66,9 @@ def import_gwas(path="gwascatalog.txt"):
             disease_trait = rel["Disease/Trait"],
             pubmed_id = pid)
             
-        for rel in gwas:
+        for rel in line:
             # init gene relation
+            gene = None
             if rel["Intergenic"] == "1":
                 gene = Gene.get_or_insert(rel["Snp_gene_ids"].strip(),
                     name = rel["Mapped_gene"],
@@ -74,6 +77,7 @@ def import_gwas(path="gwascatalog.txt"):
                 gene.put()
 
             # init snps..
+            snp = None
             if rel["Snp_id_current"] != "":
                 snp = Snp.get_or_insert(rel["Snp_id_current"],
                     snpid=rel["Snp_id_current"])
@@ -83,8 +87,33 @@ def import_gwas(path="gwascatalog.txt"):
             # maybe an if here, to check or overwriting?
                 snp.put()
 
+            gwas = GWAS(study=study.key())
+            if gene:
+                gwas.gene = gene.key()
+            gwas.p_string = rel["p-Value"]
+            try:
+                int(rel["p-Value"])
+                gwas.p_val = int(rel["p-Value"].split("E")[1])    
+            except Exception, e:
+                gwas.p_val = 0
+            gwas.OR_beta = rel["OR or beta"]
+            gwas.riscAlleleFrequency = rel["Risk Allele Frequency"]
+            gwas.intergenic = rel['Intergenic'] == '2'
+            gwas.put()
+    print "done"
 
-
+def tear_down():
+    for model in ["Snp", "Gene", "GWAS", "Study"]:
+        try:
+            while True:
+                q = db.GqlQuery("SELECT __key__ FROM %s" % model)
+                assert q.count()
+                db.delete(q.fetch(200))
+                # time.sleep(0.5)
+        except Exception, e:
+            print e
+            pass
+    print "done"
 
 # given list of snpids - returns the list of related OMIM IDs
 def snp_omim(snpids=None):
@@ -121,8 +150,6 @@ class jTemplate():
     def render(template, variables, printer):
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
-
-
 
 class AppRequestHandler(webapp.RequestHandler):
     _template = None

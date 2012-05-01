@@ -5,7 +5,7 @@ class Study(db.Model):
     # 3
     date = db.DateProperty()
     # 1 - private key
-    pubmed_id = db.IntegerProperty()
+    pubmed_id = db.StringProperty()
     # 5
     pubmed_url = db.LinkProperty()
     # 6 - description of study
@@ -30,7 +30,7 @@ class Gene(db.Model):
     studies = db.ListProperty(db.Key) # or simply pubmed_ids..
     alias = db.StringListProperty()
     name = db.StringProperty(required=True)
-    geneid = db.IntegerProperty()
+    geneid = db.StringProperty()
 
 # id = SNPID
 class Snp(db.Model):
@@ -63,8 +63,9 @@ class GWAS(db.Model):
     # 6 * 10^-8 => p_val = -8
     p_val = db.IntegerProperty() 
     # 30 - Odds ratio #.##
-    OR_beta = db.FloatProperty()
+    # OR_beta = db.FloatProperty()
+    OR_beta = db.StringProperty()
     # 26 - #.##
-    riscAlleleFrequency = db.FloatProperty()
+    riscAlleleFrequency = db.StringProperty()
     # 25 - 1=no, 2=yes
     intergenic = db.BooleanProperty()

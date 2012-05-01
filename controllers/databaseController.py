@@ -4,7 +4,7 @@
 #
 ###
 
-from Utilities import AppRequestHandler
+from util import AppRequestHandler
 from Bio import Entrez
 from xml.dom.minidom import parseString
 
@@ -92,36 +92,6 @@ class dbSNP(AppRequestHandler):
             #print rsid
 
         self.toXML(dom.toprettyxml(), True)
-
-
-class LookUpSNP(AppRequestHandler):
-    def get(self):
-        self.setTemplate('data/snpedia.html')
-
-        snp = self.request.get("snp")
-        if len(snp) == 0:
-            self.out({'error':"No SNP title given (snp='')"})
-            return
-        site = wiki.Wiki("http://bots.snpedia.com/api.php")
-        params = {
-            'action': 'query',
-            'prop': 'revisions',
-            'rvprop': 'content',
-            'rvlimit': '1',
-            'titles':snp
-        }
-        req = api.APIRequest(site, params)
-        result = req.query(querycontinue=False)
-
-        # if pageid == -1 <=> title=snp does not exist
-        pageid = int(result['query']['pages'].keys()[0])
-        if pageid == -1:
-            self.out({'error':"No SNP title given (snp='')"})
-            return
-
-        # OMFG this is ugly..
-        self.out({'msg':(result['query']["pages"][str(pageid)]["revisions"][0]["*"].encode('utf-8').replace("{{","<br>").replace("}}", "<br>").replace("\n","<br>"))})
-
 
 
 __routes__ = [('/dbsnp/',  dbSNP),
