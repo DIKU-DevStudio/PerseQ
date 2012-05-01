@@ -20,6 +20,10 @@ class Study(db.Model):
     repl_sample = db.StringProperty()
     platform = db.StringProperty()
 
+    @property
+    def genes(self):
+        return Gene.gql("WHERE studies = :1", self.key())
+
 # id NCBI gene_id
 # handle relations with ancestors
 class Gene(db.Model):
@@ -32,7 +36,8 @@ class Gene(db.Model):
 class Snp(db.Model):
     studies = db.ListProperty(db.Key)
     # kan ligge uden for et gen, derfor ikke required
-    gene = db.ReferenceProperty(Gene)
+    gene = db.ReferenceProperty(Gene,
+            collection_name='snps')
     snpid = db.StringProperty() # rs1805007
 
 # ID = random
@@ -40,7 +45,8 @@ class Snp(db.Model):
 class GWAS(db.Model):
     # maybe ancestor instead?
     # - improves consistency in high replication data store
-    study = db.ReferenceProperty(Study, required=True)
+    study = db.ReferenceProperty(Study, required=True,
+            collection_name='gwas')
 
     # if the snp is _in_ a specific gene - this is the id
     gene = db.ReferenceProperty(Gene)
