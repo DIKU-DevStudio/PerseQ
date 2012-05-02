@@ -45,7 +45,7 @@ Platform [SNPs passing QC]
 CNV"""
 from models.study import Study, GWAS, Gene, Snp
 import csv
-def populate(path="gwascatalog.txt"):
+def populate(path="gwascatalog.txt", limit=100):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
     pubids = {}
     for doc in docs:
@@ -55,7 +55,6 @@ def populate(path="gwascatalog.txt"):
         else:
             pubids[pubid] = [doc]
 
-    limit = 300
     i = 0
     for pid, line in pubids.iteritems():
         i += 1
@@ -87,9 +86,9 @@ def populate(path="gwascatalog.txt"):
                 # not intergenic => one direct gene
                     names = rel["Mapped_gene"].split(" - ")
                     if len(names) == 1:
-                        gene = Gene.get_or_insert(rel["Snp_gene_ids"].strip(),
+                        gene = Gene.get_or_insert(geneid,
                             name = rel["Mapped_gene"],
-                            geneid = rel["Snp_gene_ids"])
+                            geneid = geneid)
 
                         gene.studies.append(study.key())
                         gene.put()
@@ -107,7 +106,7 @@ def populate(path="gwascatalog.txt"):
                     # create upstream gene
                     up_name = up_down_names[0]
                     down_name = up_down_names[1]
-                    print down_name, up_name
+                    # print down_name, up_name
                     # assert("-" not in up_name)
                     # assert("-" not in down_name)
 
@@ -125,27 +124,29 @@ def populate(path="gwascatalog.txt"):
 
             # init snps..
             snp = None
-            if rel["Snp_id_current"] != "":
+            snpid = rel["Snp_id_current"]
+
+            if snpid != "":
                 # non=blank snp
-                snpid = rel["Snp_id_current"].strip()
 
                 snp = Snp.get_or_insert(snpid,
                     snpid=snpid)
                 if gene:
-                    snp.gene = gene.key()
-                snp.studies.append(study.key())
+                    snp.gene = gene
+                if not study.key() in snp.studies:
+                    snp.studies.append(study.key())
             # maybe an if here, to check for overwriting?
                 snp.put()
             
             # init gwas relation
-            gwas = GWAS(study=study.key(), intergenic=intergenic)
+            gwas = GWAS(study=study, intergenic=intergenic)
             if intergenic:
                 if down_gene and up_gene:
-                    gwas.downstream = down_gene.key()
-                    gwas.upstream = up_gene.key()
+                    gwas.downstream = down_gene
+                    gwas.upstream = up_gene
             else:
                 if gene:
-                    gwas.gene = gene.key()
+                    gwas.gene = gene
 
             # parse remaining gwas information
             gwas.p_string = rel["p-Value"]
@@ -156,7 +157,7 @@ def populate(path="gwascatalog.txt"):
                 float(rel["p-Value"])
                 gwas.p_val = int(rel["p-Value"].split("E")[1])    
             except Exception, e:
-                print e
+                # print e
                 # forces the filter to downgrade this gwas wrt. p-value
                 gwas.p_val = 0
             # could be interesting
