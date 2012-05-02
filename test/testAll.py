@@ -81,24 +81,26 @@ class DemoTestCase(unittest2.TestCase):
         self.assertEqual(referenced_articles, ref_ids)
 
     def testGWAS(self):
-        """PubMed study id = '17603485'
-        - relation to gene_name 'HNF1B'
-        - relation to snp_id '4430796'
-        - and reverse relations
-        """
+        """Test relations in GWAS:
+        - study(17603485) <*--*> gene(HNF1B)
+        - study(17603485) <*---*> snp(4430796)"""
         populate(limit=100)
         pubmed_id = "17603485"
         snpid = "4430796"
+
+        
+        # get reference study
         stud = Study.get_by_key_name(pubmed_id)
         
-        # make sure the relation is known to the study
+        # determine the relation to the gene
         names = [gwas.gene.name for gwas in stud.gwas if gwas.gene]
         self.assertTrue("HNF1B" in names)
 
-        # make sure the relation is known to gene
+        # make sure the relation to study is known to gene
         gene = Gene.all().filter('name =', "HNF1B")[0]
         self.assertTrue(stud.key() in gene.studies)
 
+        # make sure that the study is known to snp
         snp = Snp.get_by_key_name(snpid)
         self.assertTrue(stud.key() in snp.studies)
 

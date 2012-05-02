@@ -5,7 +5,7 @@ class Study(db.Model):
     # 3
     date = db.DateProperty()
     # 1 - private key
-    pubmed_id = db.StringProperty()
+    pubmed_id = db.StringProperty(required=True)
     # 5
     pubmed_url = db.LinkProperty()
     # 6 - description of study

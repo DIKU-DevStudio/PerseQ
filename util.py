@@ -6,6 +6,8 @@ import json
 import logging
 from google.appengine.ext import db
 
+from datetime import datetime
+
 from Bio import Entrez
 
 """
@@ -64,12 +66,17 @@ def populate(path="gwascatalog.txt", limit=100):
         # print pid
         study = Study.get_or_insert(pid, 
             name=rel["Study"],
-            pubmed_url=rel["Link"],
-            init_sample = rel["Initial Sample Size"],
-            repl_sample= rel["Replication Sample Size"],
-            platform = rel["Platform [SNPs passing QC]"],
             disease_trait = rel["Disease/Trait"],
             pubmed_id = pid)
+        # print rel["Date"].strip()
+        date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
+        # print date
+        study.date = date
+        study.pubmed_url=rel["Link"].strip()
+        study.init_sample = rel["Initial Sample Size"].strip()
+        study.repl_sample= rel["Replication Sample Size"].strip()
+        study.platform = rel["Platform [SNPs passing QC]"].strip()
+        study.put()
             
         for rel in line:
             # init gene relation
