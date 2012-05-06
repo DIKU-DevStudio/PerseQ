@@ -247,7 +247,7 @@ class AppRequestHandler(webapp.RequestHandler):
     def setTemplate(self, template):
         self._template = template
 
-    def out(self, dictionary = {}, out=None):
+    def out(self, dictionary = {}):
         if(self._template == None):
             # Get template from controller / method names
             actionName = self.__class__.__name__
