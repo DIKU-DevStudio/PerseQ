@@ -5,7 +5,10 @@
 from util import AppRequestHandler
 import csv
 from StringIO import StringIO
+from google.appengine.api import users
 from models.study import Study
+from models.annotation import StudyComment
+from datetime import datetime
 
 class gwasReader(AppRequestHandler):
     def get(self):
@@ -16,8 +19,22 @@ class gwasReader(AppRequestHandler):
 class studyPresenter(AppRequestHandler):
     def get(self, i):
         self.setTemplate('study.html')
-        studies = Study.gql("WHERE pubmed_id = :1", i).fetch(1,0)
-        self.out({'studies': studies})
+        study = Study.gql("WHERE pubmed_id = :1", i).get()
+        self.out({'studies': [study]})
+
+    def post(self, i):
+        self.setTemplate('study.html')
+        study = Study.gql("WHERE pubmed_id = :1", i).get()
+
+        comment = StudyComment()
+        comment.study = study.key()
+        comment.body = self.request.get("comment")
+        comment.user = users.get_current_user()
+        comment.date = datetime.now()
+        comment.put()
+
+        self.out({'studies': [study]})
+
 
 __routes__ = [('/gwas/', gwasReader),
               ('/study/(.*)', studyPresenter)]
