@@ -16,6 +16,7 @@
 #
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+from google.appengine.api import users
 
 import logging
 import controllers

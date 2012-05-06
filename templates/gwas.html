@@ -1,66 +1,70 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% set d = 0 %}
-{% set trait = 0 %}
-{% set study = '0' %}
-{% for item in gwasList %}
-    {% if item.Study != study or item['Disease/Trait'] != trait or item.Date != d %}
-        {% if d != 0 %}
-            </tbody></table>
-            </div>
-            </article>
-        {% endif %}
-        {% set study = item.Study %}
-        {% set trait = item['Disease/Trait'] %}
-        {% set d = item.Date %}
-        <article class="row">
-        <time class="span1">{{item.Date}}</time>
+
+{% if studies %}
+{% for study in studies %}
+    <article class="row">
+        <time class="span1">{{study.date}}</time>
         <div class="span10">
-        <h3>{{item['Disease/Trait']}}</h3>
-        <h3><small>{{item.Study}}</small></h3>
-        <dl class="dl-horizontal"><dt>Sample size(s):</dt><dd> {{item['Initial Sample Size']}} / {{item['Replication Sample Size']}}</dd><dt>Platform</dt><dd> {{item['Platform [SNPs passing QC]']}}</dd></dl>
-        <p><a href="/study/{{item.PUBMEDID}}" class="btn btn-mini">Study #{{item.PUBMEDID}}</a><a href="{{item.Link}}" class="btn btn-mini">View on pubmed</a></p>
-        <table class="table"><thead><tr>
+        <h3>{{study.disease_trait}}</h3>
+        <h3><small>{{study.name}}</small></h3>
+        <dl class="dl-horizontal">
+            <dt>Sample size(s):</dt>
+                <dd>{{study.init_sample}}</dd>
+            <dt>Replication sample:</dt>
+                <dd>{{study.repl_sample}}</dd>
+            <dt>Platform</dt>
+                <dd> {{study.platform}}</dd>
+        </dl>
+        <p><a href="/study/{{study.pubmed_id}}" class="btn btn-mini">
+            Study #{{study.pubmed_id}}</a>
+            <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
+        </p>
+        <table class="table">
+            <thead><tr>
                     <th class="span3">Gene(s)</th>
                     <th class="span2">SNPs</th>
                     <th class="span2">Intergenic</th>
                     <th class="span1">Odds Ratio</th>
                     <th class="span1">p&#8209;Value</th>
-                </tr></thead><tbody>
-    {% endif %}
+                    <th class="span1">Allele Freq.</th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for gwas in study.gwas %}
+            {% macro geneName() %}
+                {% if gwas.gene %}
+                    &raquo; {{gwas.gene.name}}
+                {% else %}
+                    &uarr; {{gwas.upstream.name}}
+                    &darr; {{gwas.downstream.name}}
+                {% endif %}
+            {% endmacro %}
+            <tr>
+                <td>{{geneName()}}</td>
+                <td>
+                    <a href="/search/?q={{gwas.snps}}">{{gwas.snps}}
+                    </a>
+                </td>
+                <td>{{gwas.intergenic}}</td>
+                <td>{{gwas.OR_beta}}</td>
+                <td>{{gwas.p_val}}</td>
+                <td>{{gwas.riscAlleleFrequency}}</td>
+            </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </article>
 
-    {% macro geneName() %}
-    {% set genes = item['Mapped_gene'].split(' - ') %}
-    {% if genes|length == 2 %}
-            &uarr; {{genes[0]}} &darr; {{genes[1]}}
-            {% else %}
-            {{genes.length}}
-            &raquo; {{genes[0]}}
-    {% endif %}
-    {% endmacro %}
+{% endfor %}
+{% endif %}
 
-    <tr>
-        <td>{{geneName()}}</td>
-        <td>{% for snp in item.SNPs.split(', ') %}
-            <a href="/search/?q={{snp}}">{{snp}}</a> 
-            {% endfor %}</td>
-        <td>{{item.Intergenic == '2'}}</td>
-        <td>{{item['OR or beta']}}</td>
-        <td>{{item['p-Value']}}</td>
-    </tr>
-    {% endfor %}
-</tbody></table>
-</div>
-</article>
 {% block maturity %}
-
 {% endblock %}
 
 {% block comments %}
-<p>Postgame dump:</p>
-<pre>
-{{gwasList[0]}}
-</pre>
 {% endblock %}
+
 {% endblock %}

@@ -19,6 +19,5 @@ def main(test_path):
     suite = unittest2.loader.TestLoader().discover(test_path)
     unittest2.TextTestRunner(verbosity=2).run(suite)
 
-
 if __name__ == '__main__':
     main(test_path="test")

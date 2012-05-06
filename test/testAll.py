@@ -14,6 +14,10 @@ from google.appengine.ext import testbed
 
 from models.snp import snp
 
+from models.study import Snp, Gene, Study, GWAS
+
+from util import populate
+
 # test get_or_insert
 class DemoTestCase(unittest2.TestCase):
 
@@ -24,6 +28,7 @@ class DemoTestCase(unittest2.TestCase):
         self.testbed.activate()
         # Next, declare which service stubs you want to use.
         self.testbed.init_datastore_v3_stub()
+
         # self.testbed.init_memcache_stub()
 
     def tearDown(self):
@@ -74,6 +79,31 @@ class DemoTestCase(unittest2.TestCase):
                 ref_ids.append(ref['Id'])
 
         self.assertEqual(referenced_articles, ref_ids)
+
+    def testGWAS(self):
+        """Test relations in GWAS:
+        - study(17603485) <*--*> gene(HNF1B)
+        - study(17603485) <*---*> snp(4430796)"""
+        populate(limit=100)
+        pubmed_id = "17603485"
+        snpid = "4430796"
+
+        
+        # get reference study
+        stud = Study.get_by_key_name(pubmed_id)
+        
+        # determine the relation to the gene
+        names = [gwas.gene.name for gwas in stud.gwas if gwas.gene]
+        self.assertTrue("HNF1B" in names)
+
+        # make sure the relation to study is known to gene
+        gene = Gene.all().filter('name =', "HNF1B")[0]
+        self.assertTrue(stud.key() in gene.studies)
+
+        # make sure that the study is known to snp
+        snp = Snp.get_by_key_name(snpid)
+        self.assertTrue(stud.key() in snp.studies)
+
 
 if __name__ == '__main__':
 	unittest2.main()

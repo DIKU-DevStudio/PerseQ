@@ -13,6 +13,7 @@ handlers:
   upload: favicon\.ico
 
 
+  
 - url: /css
   static_dir: bootstrap/css
 - url: /js
@@ -22,6 +23,7 @@ handlers:
 
 - url: .*
   script: main.py
+  login: required
 
 libraries:
 - name: jinja2

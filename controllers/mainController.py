@@ -2,7 +2,7 @@
 # Controller for main presentation
 #
 ###
-from Utilities import AppRequestHandler
+from util import AppRequestHandler
 from models.snp import snp
 
 class snpSearch(AppRequestHandler):
@@ -13,7 +13,17 @@ class snpSearch(AppRequestHandler):
 
 class dashboard(AppRequestHandler):
     def get(self):
+        #TODO: If we want to use a login link on the dashboard, this is google's suggested code:
+        # user = users.get_current_user()
+        # if user:
+        #     greeting = ("Welcome, %s! (<a href=\"%s\">sign out</a>)" %
+        #                 (user.nickname(), users.create_logout_url("/")))
+        # else:
+        #     greeting = ("<a href=\"%s\">Sign in or register</a>." %
+        #                 users.create_login_url("/"))
         self.out()
+        
+        
 
 __routes__ = [('/',dashboard),
               ('/search/', snpSearch)]
