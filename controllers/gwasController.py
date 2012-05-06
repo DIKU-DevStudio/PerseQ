@@ -4,7 +4,6 @@
 ###
 from util import AppRequestHandler
 import csv
-from StringIO import StringIO
 from google.appengine.api import users
 from models.study import Study
 from models.annotation import Comment
@@ -26,8 +25,8 @@ class gwasReader(AppRequestHandler):
             # add to memchache
             if not memcache.add('gwas_main', rendered):
                 logging.error("Memcache set failed.")
-        else:
-            self.response.out.write(rendered)
+        
+        self.response.out.write(rendered)
 
         # self.out({'studies': studies})
 
