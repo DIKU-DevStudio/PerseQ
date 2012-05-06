@@ -7,7 +7,7 @@ import csv
 from StringIO import StringIO
 from google.appengine.api import users
 from models.study import Study
-from models.annotation import StudyComment
+from models.annotation import Comment
 from datetime import datetime
 
 class gwasReader(AppRequestHandler):
@@ -26,7 +26,7 @@ class studyPresenter(AppRequestHandler):
         self.setTemplate('study.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
 
-        comment = StudyComment()
+        comment = Comment()
         comment.study = study.key()
         comment.body = self.request.get("comment")
         comment.user = users.get_current_user()
