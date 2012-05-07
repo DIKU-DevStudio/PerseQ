@@ -5,10 +5,11 @@ import json
 # import inspect
 import logging
 from google.appengine.ext import db
-
+from google.appengine.api import memcache
 from datetime import datetime
 
 from Bio import Entrez
+import StringIO
 
 """
 Date Added to Catalog
@@ -175,6 +176,8 @@ def populate(path="gwascatalog.txt", limit=100):
                 rel["Risk Allele Frequency"].strip()
 
             gwas.put()
+
+    memcache.delete('gwas_main')
     print "done"
 
 def purge():
@@ -226,8 +229,20 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
+import StringIO
+
 class AppRequestHandler(webapp.RequestHandler):
     _template = None
+
+    def render(self, dictionary={}):
+        """returns the rendered html for easy caching"""
+        if self._template is None:
+            # Get template from controller / method names
+            actionName = self.__class__.__name__
+            self._template = actionName+".html"
+        output = StringIO.StringIO()
+        jTemplate.render(self._template, dictionary, output.write)
+        return output.getvalue()
 
     def setTemplate(self, template):
         self._template = template
