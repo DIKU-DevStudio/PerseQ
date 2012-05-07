@@ -4,6 +4,7 @@
 ###
 from util import AppRequestHandler
 from models.snp import snp
+from models.users import UserData
 
 class snpSearch(AppRequestHandler):
     def get(self):
@@ -21,6 +22,7 @@ class dashboard(AppRequestHandler):
         # else:
         #     greeting = ("<a href=\"%s\">Sign in or register</a>." %
         #                 users.create_login_url("/"))
+        user = UserData.current()
         self.out()
         
         

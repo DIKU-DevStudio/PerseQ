@@ -6,7 +6,7 @@
 {% block content %}
 
 <div style="text-align:center;margin:0px auto;">
-    <p>Welcome to <a href="/">PerseQ</a>. Choose a path below.</p>
+    <p>Welcome, {{ user.email }}, to <a href="/">PerseQ</a>. Choose a path below.</p>
 <ul class="nav nav-pills" style="display:inline-block;">
     <li><a href="/search/"   class="box search">OmniSearch</a></li>
     <li><a href="/gwas/" class="box categories">Browse diseases</a></li>
