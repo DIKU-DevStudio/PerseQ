@@ -22,9 +22,6 @@ handlers:
   script: main.py
   login: required
 
-- url: /admin/.*
-  login: administrator
-
 libraries:
 - name: jinja2
   version: "2.6"
