@@ -23,7 +23,7 @@ class dashboard(AppRequestHandler):
         #     greeting = ("<a href=\"%s\">Sign in or register</a>." %
         #                 users.create_login_url("/"))
         user = UserData.current()
-        self.out()
+        self.out({'username':user.nickname})
         
         
 

@@ -12,7 +12,7 @@ class UserData(db.Model):
     # This should be treated as primary key - we populate automatically from Google user ID
     user_id = db.StringProperty()
 
-    user_nickname = db.StringProperty(indexed=False)
+    user_nickname = db.StringProperty(indexed=False,default="")
 
     moderator = db.BooleanProperty(default=False)
 
@@ -23,7 +23,9 @@ class UserData(db.Model):
     @property
     def nickname(self):
         """Gets human friendly name"""
-        return self.user_nickname
+        #TODO(jpr) Get nickname field, and implement UI for setting it
+        return self.user.email
+        
 
     @staticmethod
     def current():
@@ -97,7 +99,7 @@ class UserData(db.Model):
             return None
         
         if not email:
-            # Every account that isn't a child account requires an e-mail.
+            # Every account requires an e-mail.
             return None
         
         # Make default dummy values for the ones that don't matter
