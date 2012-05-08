@@ -4,17 +4,31 @@
 ###
 from util import AppRequestHandler
 import csv
-from StringIO import StringIO
 from google.appengine.api import users
 from models.study import Study
 from models.annotation import Comment
 from datetime import datetime
+import logging
+from google.appengine.api import memcache
 
 class gwasReader(AppRequestHandler):
     def get(self):
         self.setTemplate('gwas.html')
-        studies = Study.all().fetch(10,0)
-        self.out({'studies': studies})
+
+        # check memcache for main
+        rendered = memcache.get("gwas_main")
+        if rendered is None:
+            # make large query, to check for speed when cached
+            studies = Study.all().fetch(50)
+            rendered = self.render({'studies': studies})
+            # logging.debug(rendered )
+            # add to memchache
+            if not memcache.add('gwas_main', rendered):
+                logging.error("Memcache set failed.")
+        
+        self.response.out.write(rendered)
+
+        # self.out({'studies': studies})
 
 class studyPresenter(AppRequestHandler):
     def get(self, i):
