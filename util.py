@@ -12,6 +12,8 @@ from Bio import Entrez
 import StringIO
 
 """
+imports the GWAS catalog file - and creates the 
+
 Date Added to Catalog
 PUBMEDID
 First Author
@@ -46,7 +48,8 @@ OR or beta
 95\% CI (text)
 Platform [SNPs passing QC]
 CNV"""
-from models.study import Study, GWAS, Gene, Snp
+from models.study import Study, GWAS, Gene, Snp, Disease
+
 import csv
 def populate(path="gwascatalog.txt", limit=100):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
@@ -65,9 +68,14 @@ def populate(path="gwascatalog.txt", limit=100):
             break
         rel = line[0]
         # print pid
-        study = Study.get_or_insert(pid, 
+        disease_name = rel["Disease/Trait"].strip()
+        disease = Disease.get_or_insert(disease_name,
+            name=disease_name)
+
+        study = Study.get_or_insert(pid,
             name=rel["Study"],
-            disease_trait = rel["Disease/Trait"],
+            disease_trait = disease_name,
+            disease_ref = disease,
             pubmed_id = pid)
         # print rel["Date"].strip()
         date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
@@ -97,8 +105,10 @@ def populate(path="gwascatalog.txt", limit=100):
                         gene = Gene.get_or_insert(geneid,
                             name = rel["Mapped_gene"],
                             geneid = geneid)
-
-                        gene.studies.append(study.key())
+                        if not study.key() in gene.studies:
+                            gene.studies.append(study.key())
+                        if not disease.key() in gene.diseases:
+                            gene.diseases.append(disease.key())
                         gene.put()
             else:
                 # up and downstream genes must be set
@@ -132,33 +142,45 @@ def populate(path="gwascatalog.txt", limit=100):
 
             # init snps..
             snp = None
-            snpid = rel["Snp_id_current"]
+            snpid = rel["Snp_id_current"].strip()
 
             if snpid != "":
                 # non=blank snp
-
-                snp = Snp.get_or_insert(snpid,
-                    snpid=snpid)
-                if gene:
-                    snp.gene = gene
-                if not study.key() in snp.studies:
-                    snp.studies.append(study.key())
-            # maybe an if here, to check for overwriting?
-                snp.put()
+                try:
+                    # create relation only if a 'single' snp is in the gwas
+                    int(snpid)
+                    snp = Snp.get_or_insert(snpid,
+                        snpid=snpid)
+                    if gene:
+                        snp.gene = gene
+                    if not study.key() in snp.studies:
+                        snp.studies.append(study.key())
+                    if not disease.key() in snp.diseases:
+                        snp.diseases.append(disease.key())
+                    snp.put()
+                except:
+                    # haplotype?
+                    snpid = "N/A"
             
-            # init gwas relation
-            gwas = GWAS(study=study, intergenic=intergenic)
+            # if no gene or snp relation is mentioned - ignore and just insert study
+            if (gene is None or up_gene is None) and snp is None:
+                print "skipping gwas"
+                continue
+            # init gwas
+            gwas = GWAS(study=study, intergenic=intergenic, disease=disease)
             if intergenic:
-                if down_gene and up_gene:
+                if down_gene is not None and up_gene is not None:
                     gwas.downstream = down_gene
                     gwas.upstream = up_gene
             else:
-                if gene:
-                    gwas.gene = gene
+                # could be None
+                gwas.gene = gene
 
             # parse remaining gwas information
-            gwas.p_string = rel["p-Value"]
-            gwas.snps = rel["Snp_id_current"].strip()
+            gwas.p_string = rel["p-Value"].strip()
+            # could be none
+            gwas.snps = snpid
+            
             # parse out the exponent: 6E-8 => -8
             try:
                 # test that p-Value is actually a float before parsing out
@@ -171,10 +193,10 @@ def populate(path="gwascatalog.txt", limit=100):
             # could be interesting
             gwas.strongest_snp_risk_allele = \
                 rel["Strongest SNP-Risk Allele"].strip()
+            # gwas.CI = rel["95% CI (text)"].strip()
             gwas.OR_beta = rel["OR or beta"].strip()
             gwas.riscAlleleFrequency = \
                 rel["Risk Allele Frequency"].strip()
-
             gwas.put()
 
     memcache.delete('gwas_main')
