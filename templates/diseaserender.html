@@ -1,0 +1,12 @@
+<h2>Diseases: all</h2>
+{% for disease in diseases %}
+<article class="row">
+    <div class="span10">
+        <!-- might want to alter that to key -->
+        <h3><a href="/studies/?filter={{disease.name}}">{{disease.name}}</a></h3>
+    </div>
+</article>
+{% else %}
+    <!-- if the list is empty - could very well be a missing db init.. -->
+    <h3>No diseases..</h3>
+{% endfor %}

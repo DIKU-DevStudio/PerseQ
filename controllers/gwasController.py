@@ -5,17 +5,36 @@
 from util import AppRequestHandler
 import csv
 from models.users import UserData
-from models.study import Study
+from models.study import Study, Disease
 from models.annotation import Comment
 from datetime import datetime
 
 import logging
 from google.appengine.api import memcache
 
-class gwasReader(AppRequestHandler):
+class diseaseList(AppRequestHandler):
+    _template = "baserender.html"
+    """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     def get(self):
-        self.setTemplate('gwas.html')
+        # snp = self.request.get("filter") # returns name of disease to filter on
+        rendered = memcache.get("disease_0:50")
+        if rendered is None:
+            # make large query, to check for speed when cached
+            diseases = Disease.all()
+            # generate only the bare-bones list of diseases, ignore everything from base.html etc.
+            rendered = self.render({'diseases': diseases}, "diseaserender.html")
 
+            # add to memchache
+            if not memcache.set('disease_0:50', rendered):
+                logging.error("Memcache set failed for 'disease_0:50'")
+
+        # use cached data to render page with user-date etc. intact.
+        self.out({"rendered":rendered})
+
+class studyList(AppRequestHandler):
+    _template = 'gwas.html'
+    def get(self):
+        
         # check memcache for main
         rendered = memcache.get("gwas_main")
         if rendered is None:
@@ -51,5 +70,6 @@ class studyPresenter(AppRequestHandler):
         self.out({'studies': [study]})
 
 
-__routes__ = [('/gwas/', gwasReader),
-              ('/study/(.*)', studyPresenter)]
+__routes__ = [('/gwas/', studyList),
+              ('/study/(.*)', studyPresenter),
+              ('/diseases/', diseaseList)]

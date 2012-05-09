@@ -256,14 +256,18 @@ import StringIO
 class AppRequestHandler(webapp.RequestHandler):
     _template = None
 
-    def render(self, dictionary={}):
+    def render(self, dictionary={}, template=None):
         """returns the rendered html for easy caching"""
         if self._template is None:
             # Get template from controller / method names
             actionName = self.__class__.__name__
             self._template = actionName+".html"
         output = StringIO.StringIO()
-        jTemplate.render(self._template, dictionary, output.write)
+        if template is not None:
+            jTemplate.render(template, dictionary, output.write)
+        else:
+            jTemplate.render(self._template, dictionary, output.write)
+        
         return output.getvalue()
 
     def setTemplate(self, template):
