@@ -16,13 +16,18 @@ class diseaseList(AppRequestHandler):
     _template = "baserender.html"
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     def get(self):
+        filter = self.request.get("filter") # returns name of disease to filter on
+        if filter is not None:
+            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
+            filter = None
+            pass
         # snp = self.request.get("filter") # returns name of disease to filter on
         rendered = memcache.get("disease_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             diseases = Disease.all()
             # generate only the bare-bones list of diseases, ignore everything from base.html etc.
-            rendered = self.render({'diseases': diseases}, "diseaserender.html")
+            rendered = self.render({'diseases': diseases, 'filter': filter}, "diseaselistrender.html")
 
             # add to memchache
             if not memcache.set('disease_0:50', rendered):
@@ -32,21 +37,26 @@ class diseaseList(AppRequestHandler):
         self.out({"rendered":rendered})
 
 class studyList(AppRequestHandler):
-    _template = 'gwas.html'
+    _template = 'baserender.html'
     def get(self):
-        
         # check memcache for main
-        rendered = memcache.get("gwas_main")
+        filter = self.request.get("filter") # returns name of disease to filter on
+        if filter is not None:
+            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
+            filter = None
+            pass
+
+        rendered = memcache.get("studylist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             studies = Study.all().fetch(50)
-            rendered = self.render({'studies': studies})
+            rendered = self.render({'studies': studies, 'filter': filter}, "studylistrender.html")
             # logging.debug(rendered )
             # add to memchache
             if not memcache.add('gwas_main', rendered):
                 logging.error("Memcache set failed.")
         
-        self.response.out.write(rendered)
+        self.out({'rendered':rendered})
 
         # self.out({'studies': studies})
 
@@ -70,6 +80,6 @@ class studyPresenter(AppRequestHandler):
         self.out({'studies': [study]})
 
 
-__routes__ = [('/gwas/', studyList),
+__routes__ = [('/studies/', studyList),
               ('/study/(.*)', studyPresenter),
               ('/diseases/', diseaseList)]

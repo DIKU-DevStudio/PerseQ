@@ -1,4 +1,63 @@
-{% extends 'gwas.html' %}
+{% extends "base.html" %}
+
+{% block content %}
+{% for study in studies %}
+    <article class="row">
+        <time class="span1">{{study.date}}</time>
+        <div class="span10">
+        <h3>{{study.disease_trait}}</h3>
+        <h3><small>{{study.name}}</small></h3>
+        <dl class="dl-horizontal">
+            <dt>Sample size(s):</dt>
+                <dd>{{study.init_sample}}</dd>
+            <dt>Replication sample:</dt>
+                <dd>{{study.repl_sample}}</dd>
+            <dt>Platform</dt>
+                <dd> {{study.platform}}</dd>
+        </dl>
+        <p><a href="/study/{{study.pubmed_id}}" class="btn btn-mini">
+            Study #{{study.pubmed_id}}</a>
+            <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
+        </p>
+        {% if study.gwas %}
+        <table class="table">
+            <thead><tr>
+                    <th class="span3">Gene(s)</th>
+                    <th class="span2">SNPs</th>
+                    <th class="span2">Intergenic</th>
+                    <th class="span1">Odds Ratio</th>
+                    <th class="span1">p&#8209;Value</th>
+                    <th class="span1">Allele Freq.</th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for gwas in study.gwas %}
+            {% macro geneName() %}
+                {% if gwas.gene %}
+                    &raquo; {{gwas.gene.name}}
+                {% else %}
+                    &uarr; {{gwas.upstream.name}}
+                    &darr; {{gwas.downstream.name}}
+                {% endif %}
+            {% endmacro %}
+            <tr>
+                <td>{{geneName()}}</td>
+                <td>
+                    <a href="/search/?q={{gwas.snps}}">{{gwas.snps}}
+                    </a>
+                </td>
+                <td>{{gwas.intergenic}}</td>
+                <td>{{gwas.OR_beta}}</td>
+                <td>{{gwas.p_val}}</td>
+                <td>{{gwas.riscAlleleFrequency}}</td>
+            </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        </div>
+    </article>
+{% endfor %}
 
 {% block maturity %}
 <!--
@@ -44,4 +103,6 @@
     </ol>
 
 </div>
+{% endblock %}
+
 {% endblock %}
