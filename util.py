@@ -51,7 +51,7 @@ CNV"""
 from models.study import Study, GWAS, Gene, Snp, Disease
 
 import csv
-def populate(path="gwascatalog.txt", limit=100):
+def populate(path="gwascatalog.txt", limit=200):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
     pubids = {}
     for doc in docs:
@@ -68,7 +68,7 @@ def populate(path="gwascatalog.txt", limit=100):
             break
         rel = line[0]
         # print pid
-        disease_name = rel["Disease/Trait"].strip()
+        disease_name = rel["Disease/Trait"].strip().lower()
         disease = Disease.get_or_insert(disease_name,
             name=disease_name)
 
@@ -203,7 +203,7 @@ def populate(path="gwascatalog.txt", limit=100):
     print "done"
 
 def purge():
-    for model in ["Snp", "Gene", "GWAS", "Study"]:
+    for model in ["Snp", "Gene", "GWAS", "Study", "Disease"]:
         try:
             while True:
                 q = db.GqlQuery("SELECT __key__ FROM %s" % model)

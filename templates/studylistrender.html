@@ -1,4 +1,4 @@
-<h2>Studies - filter: {% if filter %}{{filter}}{% else %}None{% endif %}</h2>
+<h2>Studies {% if filter %}- filter: {{filter}}{% endif %}</h2>
 {% for study in studies %}
 <article class="row">
     <time class="span1">{{study.date}}</time>

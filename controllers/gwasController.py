@@ -22,7 +22,7 @@ class diseaseList(AppRequestHandler):
             filter = None
             pass
         # snp = self.request.get("filter") # returns name of disease to filter on
-        rendered = memcache.get("disease_0:50")
+        rendered = memcache.get("diseaselist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             diseases = Disease.all()
@@ -30,8 +30,8 @@ class diseaseList(AppRequestHandler):
             rendered = self.render({'diseases': diseases, 'filter': filter}, "diseaselistrender.html")
 
             # add to memchache
-            if not memcache.set('disease_0:50', rendered):
-                logging.error("Memcache set failed for 'disease_0:50'")
+            if not memcache.set('diseaselist_0:50', rendered):
+                logging.error("Memcache set failed for 'diseaselist_0:50'")
 
         # use cached data to render page with user-date etc. intact.
         self.out({"rendered":rendered})
