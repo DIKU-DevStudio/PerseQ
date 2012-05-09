@@ -1,7 +1,8 @@
-from google.appengine.api import datastore_errors, users
+"""
+This file contains models directly related to users.
+"""
+from google.appengine.api import users
 from google.appengine.ext import db
-import datetime
-
 
 class UserData(db.Model):
     # derived from https://khanacademy.kilnhg.com/Code/Website/Group/stable/File/user_models.py?rev=tip
@@ -9,10 +10,11 @@ class UserData(db.Model):
     # do not reference this directly
     user = db.UserProperty()
 
-    # This should be treated as primary key - we populate automatically from Google user ID
+    # This should be treated as primary key 
+    #  - we populate automatically from Google user ID
     user_id = db.StringProperty()
 
-    user_nickname = db.StringProperty(indexed=False,default="")
+    user_nickname = db.StringProperty(indexed=False, default="")
 
     moderator = db.BooleanProperty(default=False)
 
@@ -46,7 +48,10 @@ class UserData(db.Model):
             return UserData.insert_for(uid, email)
 
     @staticmethod
-    def get_from_request_info(user_id,email=None):
+    def get_from_request_info(user_id, email=None):
+        """
+        Retrieves a user from an id or email address
+        """
         if not user_id:
             return None
 
@@ -57,15 +62,21 @@ class UserData(db.Model):
 
     @staticmethod
     def get_from_user_id(user_id):
+        """
+        Retrieves a user from an id
+        """
         if not user_id:
             return None
 
         query = UserData.all()
-        query.filter('user_id =' ,user_id)
+        query.filter('user_id =', user_id)
         return query.get()
 
     @staticmethod
     def get_from_db_key_email(email):
+        """
+        Retrieves a user by email address
+        """
         if not email:
             return None
 
@@ -121,9 +132,6 @@ class UserData(db.Model):
             'user_id': user_id,
             'user_email': user_email,
             }.iteritems():
-            if pname in prop_values:
-                logging.warning("UserData creation about to override"
-                                " specified [%s] value" % pname)
             prop_values[pname] = pvalue
 
         # No username means we don't have to do manual transactions.
@@ -136,4 +144,7 @@ class UserData(db.Model):
 
     @classmethod
     def key_for(cls, user_id):
+        """ 
+        Gives a user id key string 
+        """
         return "user_id_key_%s" % user_id
