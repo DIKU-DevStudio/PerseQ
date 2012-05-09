@@ -12,6 +12,8 @@ from Bio import Entrez
 import StringIO
 
 """
+imports the GWAS catalog file - and creates the 
+
 Date Added to Catalog
 PUBMEDID
 First Author
@@ -46,7 +48,8 @@ OR or beta
 95\% CI (text)
 Platform [SNPs passing QC]
 CNV"""
-from models.study import Study, GWAS, Gene, Snp
+from models.study import Study, GWAS, Gene, Snp, Disease
+
 import csv
 def populate(path="gwascatalog.txt", limit=100):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
@@ -72,7 +75,7 @@ def populate(path="gwascatalog.txt", limit=100):
         study = Study.get_or_insert(pid,
             name=rel["Study"],
             disease_trait = disease_name,
-            disease_rel = disease,
+            disease_ref = disease,
             pubmed_id = pid)
         # print rel["Date"].strip()
         date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
@@ -190,11 +193,10 @@ def populate(path="gwascatalog.txt", limit=100):
             # could be interesting
             gwas.strongest_snp_risk_allele = \
                 rel["Strongest SNP-Risk Allele"].strip()
-            gwas.CI = rel["95% CI (text)"].strip()
+            # gwas.CI = rel["95% CI (text)"].strip()
             gwas.OR_beta = rel["OR or beta"].strip()
             gwas.riscAlleleFrequency = \
                 rel["Risk Allele Frequency"].strip()
-
             gwas.put()
 
     memcache.delete('gwas_main')
