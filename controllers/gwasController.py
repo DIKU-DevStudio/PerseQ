@@ -4,10 +4,11 @@
 ###
 from util import AppRequestHandler
 import csv
-from google.appengine.api import users
+from models.users import UserData
 from models.study import Study
 from models.annotation import Comment
 from datetime import datetime
+
 import logging
 from google.appengine.api import memcache
 
@@ -43,7 +44,7 @@ class studyPresenter(AppRequestHandler):
         comment = Comment()
         comment.study = study.key()
         comment.body = self.request.get("comment")
-        comment.user = users.get_current_user()
+        comment.user = UserData.current()
         comment.date = datetime.now()
         comment.put()
 
