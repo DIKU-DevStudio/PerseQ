@@ -51,7 +51,15 @@ CNV"""
 from models.study import Study, GWAS, Gene, Snp, Disease
 
 import csv
-def populate(path="gwascatalog.txt", limit=100):
+from google.appengine.api import memcache
+def reset():
+    """resets the mem-cache:
+    (auto-reset on deploy)[http://stackoverflow.com/questions/1983556/how-can-i-have-google-app-engine-clear-memcache-every-time-a-site-is-deployed]
+    """
+    memcache.flush_all()
+
+
+def populate(path="gwascatalog.txt", limit=200):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
     pubids = {}
     for doc in docs:
@@ -68,7 +76,7 @@ def populate(path="gwascatalog.txt", limit=100):
             break
         rel = line[0]
         # print pid
-        disease_name = rel["Disease/Trait"].strip()
+        disease_name = rel["Disease/Trait"].strip().lower()
         disease = Disease.get_or_insert(disease_name,
             name=disease_name)
 
@@ -203,7 +211,7 @@ def populate(path="gwascatalog.txt", limit=100):
     print "done"
 
 def purge():
-    for model in ["Snp", "Gene", "GWAS", "Study"]:
+    for model in ["Snp", "Gene", "GWAS", "Study", "Disease"]:
         try:
             while True:
                 q = db.GqlQuery("SELECT __key__ FROM %s" % model)
@@ -256,14 +264,18 @@ import StringIO
 class AppRequestHandler(webapp.RequestHandler):
     _template = None
 
-    def render(self, dictionary={}):
+    def render(self, dictionary={}, template=None):
         """returns the rendered html for easy caching"""
         if self._template is None:
             # Get template from controller / method names
             actionName = self.__class__.__name__
             self._template = actionName+".html"
         output = StringIO.StringIO()
-        jTemplate.render(self._template, dictionary, output.write)
+        if template is not None:
+            jTemplate.render(template, dictionary, output.write)
+        else:
+            jTemplate.render(self._template, dictionary, output.write)
+        
         return output.getvalue()
 
     def setTemplate(self, template):

@@ -1,0 +1,25 @@
+<h2>Disease: {{disease.name}}</h2>
+{% for study in disease.studies %}
+<article class="row">
+    <time class="span1">{{study.date}}</time>
+    <div class="span10">
+    <h3>
+        <a href="/study/{{study.pubmed_id}}">
+        {{study.name}}</a>
+        </h3>
+    <dl class="dl-horizontal">
+        <dt>Sample size(s):</dt>
+            <dd>{{study.init_sample}}</dd>
+        <dt>Replication sample:</dt>
+            <dd>{{study.repl_sample}}</dd>
+        <dt>Platform</dt>
+            <dd> {{study.platform}}</dd>
+    </dl>
+    <p>
+        <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
+    </p>
+    </div>
+</article>
+{% else %}
+<h3>..No articles</h3>
+{% endfor %}

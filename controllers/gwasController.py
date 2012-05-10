@@ -5,40 +5,97 @@
 from util import AppRequestHandler
 import csv
 from models.users import UserData
-from models.study import Study
+from models.study import Study, Disease
 from models.annotation import Comment
 from datetime import datetime
 
 import logging
 from google.appengine.api import memcache
+from google.appengine.ext import db
 
-class gwasReader(AppRequestHandler):
+class diseaseList(AppRequestHandler):
+    _template = "baserender.html"
+    """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     def get(self):
-        self.setTemplate('gwas.html')
+        # if we need to filter later on..
+        filter = self.request.get("filter") # returns name of disease to filter on
+        if filter is not None:
+            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
+            filter = None
+            pass
+        # snp = self.request.get("filter") # returns name of disease to filter on
+        rendered = memcache.get("diseaselist_0:50")
+        if rendered is None:
+            # make large query, to check for speed when cached
+            diseases = Disease.all()
+            # generate only the bare-bones list of diseases, ignore everything from base.html etc.
+            rendered = self.render({'diseases': diseases, 'filter': filter}, "diseaselistrender.html")
 
+            # add to memchache
+            if not memcache.set('diseaselist_0:50', rendered):
+                logging.error("Memcache set failed for 'diseaselist_0:50'")
+
+        # use cached data to render page with user-date etc. intact.
+        self.out({"rendered":rendered})
+
+class diseaseView(AppRequestHandler):
+    _template = "baserender.html"
+    """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
+    def get(self):
+        name = self.request.get("name") # returns name of disease to filter on
+        if name is None:
+            # TODO (pm): return error            
+            return
+
+        # snp = self.request.get("filter") # returns name of disease to filter on
+        rendered = memcache.get(name, namespace="disease")
+        if rendered is None:
+            # make large query, to check for speed when cached
+            disease = db.get(db.Key.from_path("Disease", name))
+
+            # generate only the bare-bones list of diseases, ignore everything from base.html etc.
+            rendered = self.render({'disease': disease}, "diseaseview.html")
+
+            # add to memchache
+            if not memcache.set(name, rendered, namespace="disease"):
+                logging.error("Memcache set failed for 'disease:%s'" % name)
+
+        # use cached data to render page with user-date etc. intact.
+        self.out({"rendered":rendered})
+
+class studyList(AppRequestHandler):
+    _template = 'baserender.html'
+    def get(self):
         # check memcache for main
-        rendered = memcache.get("gwas_main")
+        filter = self.request.get("filter") # returns name of disease to filter on
+        if filter is not None:
+            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
+            # filter = None
+            pass
+            # studies = Study.gql("WHERE pubmed_id = :1", i).get()
+
+        rendered = memcache.get("studylist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             studies = Study.all().fetch(50)
-            rendered = self.render({'studies': studies})
+            rendered = self.render({'studies': studies, 'filter': filter}, "studylistrender.html")
             # logging.debug(rendered )
             # add to memchache
-            if not memcache.add('gwas_main', rendered):
+            if not memcache.add('studylist_0:50', rendered):
                 logging.error("Memcache set failed.")
         
-        self.response.out.write(rendered)
+        self.out({'rendered':rendered})
 
         # self.out({'studies': studies})
 
-class studyPresenter(AppRequestHandler):
+class studyView(AppRequestHandler):
     def get(self, i):
-        self.setTemplate('study.html')
+        self.setTemplate('studyview.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
         self.out({'studies': [study]})
 
     def post(self, i):
-        self.setTemplate('study.html')
+        self.setTemplate('studyview.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
 
         comment = Comment()
@@ -51,5 +108,7 @@ class studyPresenter(AppRequestHandler):
         self.out({'studies': [study]})
 
 
-__routes__ = [('/gwas/', gwasReader),
-              ('/study/(.*)', studyPresenter)]
+__routes__ = [('/studies/', studyList),
+              ('/study/(.*)', studyView),
+              ('/diseases/', diseaseList),
+              ('/diseaseview/', diseaseView)]

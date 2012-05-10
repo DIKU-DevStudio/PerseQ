@@ -16,7 +16,7 @@ class Study(db.Model):
     # 6 - description of study
     name = db.StringProperty(required=True)
     # 7 disease or trait researched
-    disease_ref = db.ReferenceProperty(Disease, required=True)
+    disease_ref = db.ReferenceProperty(Disease, required=True, collection_name="studies")
     # to prevent relation traversal
     disease_trait = db.StringProperty(required=True)
 
