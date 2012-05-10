@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% for study in studies %}
     <article class="row">
         <time class="span1">{{study.date}}</time>
         <div class="span10">
@@ -33,10 +32,10 @@
         {% for gwas in study.gwas %}
             {% macro geneName() %}
                 {% if gwas.gene %}
-                    &raquo; {{gwas.gene.name}}
+                    &raquo; <a href="/gene/{{gwas.gene.name}}">{{gwas.gene.name}}</a>
                 {% else %}
-                    &uarr; {{gwas.upstream.name}}
-                    &darr; {{gwas.downstream.name}}
+                    &uarr; <a href="/gene/{{gwas.upstream.name}}">{{gwas.upstream.name}}</a>
+                    &darr; <a href="/gene/{{gwas.downstream.name}}">{{gwas.downstream.name}}</a>
                 {% endif %}
             {% endmacro %}
             <tr>
@@ -56,24 +55,6 @@
         {% endif %}
         </div>
     </article>
-{% endfor %}
-
-{% block maturity %}
-<!--
-<div id="maturityRating" class="row" style="height:12em">
-    <div class="span2 well">
-        <h1><small>Rating</small></h1>
-        <h1>5.8/10.0</h1>
-    </div>
-    <div class="span8">
-        <div class="alert">
-        <strong>Warning!</strong> The chosen study has not been reviewed, or has received poor reviews.
-        </div>
-    </div>
-
-</div>
--->
-{% endblock %}
 
 {% block comments %}
 
@@ -87,9 +68,9 @@
         <input type="submit" value="Submit" />
     </form>
 
-    <h3 id="comments-title">{{studies[0].comments.count()}} Comments</h3>
+    <h3 id="comments-title">{{study.comments.count()}} Comments</h3>
     <ol class="commentlist" style="margin-left:0;list-style:none;">
-        {% for comment in studies[0].comments %}
+        {% for comment in study.comments %}
         <li class="row">
           <div class="span2">
             <img src="/img/person.png" style="float:left; padding: 5px;"/>
