@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if gene %}
+<h1>{{gene.name}}</h1>
+
+<table class="table table-striped">
+    <thead><th><h1><small>Referenced by</small></h1></th><th><h1><small>Correlated with</small></h1></th></thead>
+    <tbody>
+        {% for gwas in gene.gwas %}
+        <tr>
+            <td><a href="/study/{{gwas.study.pubmed_id}}">{{gwas.study.name}}</a></td>
+            <td>{{gwas.study.disease_trait}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">Sorry, we have no information on this particular gene. <a href="javascript:history.back()">Return</a></div>
+{% endif %}
+
+{% endblock %}

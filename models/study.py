@@ -64,7 +64,8 @@ class GWAS(db.Model):
     disease = db.ReferenceProperty(Disease, required=True)
 
     # if the snp is _in_ a specific gene - this is the id
-    gene = db.ReferenceProperty(Gene, collection_name="gene")
+    gene = db.ReferenceProperty(Gene,
+            collection_name="gwas")
     # if not, these two contain the reference-ids
     upstream = db.ReferenceProperty(Gene, collection_name="upstream")
     downstream = db.ReferenceProperty(Gene, collection_name="downstream")

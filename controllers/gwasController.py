@@ -3,9 +3,8 @@
 #
 ###
 from util import AppRequestHandler
-import csv
 from models.users import UserData
-from models.study import Study, Disease
+from models.study import Study, Disease, Gene
 from models.annotation import Comment
 from datetime import datetime
 
@@ -41,8 +40,8 @@ class diseaseList(AppRequestHandler):
 class diseaseView(AppRequestHandler):
     _template = "baserender.html"
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
-    def get(self):
-        name = self.request.get("name") # returns name of disease to filter on
+    def get(self, name):
+        #name = self.request.get("name") # returns name of disease to filter on
         if name is None:
             # TODO (pm): return error            
             return
@@ -92,8 +91,9 @@ class studyView(AppRequestHandler):
     def get(self, i):
         self.setTemplate('studyview.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
-        self.out({'studies': [study]})
+        self.out({'study': study})
 
+    # Comment on a study via POST
     def post(self, i):
         self.setTemplate('studyview.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
@@ -107,8 +107,34 @@ class studyView(AppRequestHandler):
 
         self.out({'studies': [study]})
 
+class genePresenter(AppRequestHandler):
+    _template = 'gene.html'
+    def get(self, gene):
+        gene = Gene.gql("WHERE name = :1", gene).get()
+
+        self.out({'gene':gene})
+
+    # Comment on a gene via POST
+    def post(self, gene):
+        gene = Gene.gql("WHERE name = :1", gene).get()
+
+        comment = Comment()
+        comment.gene = gene.key()
+        comment.body = self.request.get("comment")
+        comment.user = users.get_current_user()
+        comment.date = datetime.now()
+        comment.put()
+
+        self.out({'gene':gene})
+
+class commentHandler(AppRequestHandler):
+    def get(self, comment):
+        if users.is_current_user_admin():
+            comment = Comment.get_by_key(comment)
+            comment.delete()
 
 __routes__ = [('/studies/', studyList),
               ('/study/(.*)', studyView),
               ('/diseases/', diseaseList),
-              ('/diseaseview/', diseaseView)]
+              ('/disease/(.*)', diseaseView),
+              ('/gene/(.*)',  genePresenter)]
