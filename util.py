@@ -51,6 +51,14 @@ CNV"""
 from models.study import Study, GWAS, Gene, Snp, Disease
 
 import csv
+from google.appengine.api import memcache
+def reset():
+    """resets the mem-cache:
+    (auto-reset on deploy)[http://stackoverflow.com/questions/1983556/how-can-i-have-google-app-engine-clear-memcache-every-time-a-site-is-deployed]
+    """
+    memcache.flush_all()
+
+
 def populate(path="gwascatalog.txt", limit=200):
     docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
     pubids = {}

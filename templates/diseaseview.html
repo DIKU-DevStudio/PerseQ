@@ -1,10 +1,12 @@
-<h2>Studies</h2>
-{% for study in studies %}
+<h2>Disease: {{disease.name}}</h2>
+{% for study in disease.studies %}
 <article class="row">
     <time class="span1">{{study.date}}</time>
     <div class="span10">
-    <h3>{{study.disease_trait}}</h3>
-    <h3><small>{{study.name}}</small></h3>
+    <h3>
+        <a href="/study/{{study.pubmed_id}}">
+        {{study.name}}</a>
+        </h3>
     <dl class="dl-horizontal">
         <dt>Sample size(s):</dt>
             <dd>{{study.init_sample}}</dd>
@@ -13,8 +15,7 @@
         <dt>Platform</dt>
             <dd> {{study.platform}}</dd>
     </dl>
-    <p><a href="/study/{{study.pubmed_id}}" class="btn btn-mini">
-        Study #{{study.pubmed_id}}</a>
+    <p>
         <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
     </p>
     </div>

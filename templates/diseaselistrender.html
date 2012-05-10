@@ -1,9 +1,9 @@
-<h2>Diseases {% if filter %}- filter: {{filter}}{% endif %}</h2>
+<h2>Diseases</h2>
 {% for disease in diseases %}
 <article class="row">
     <div class="span10">
         <!-- might want to alter that to key -->
-        <h3><a href="/studies/?filter={{disease.name}}">{{disease.name}}</a></h3>
+        <h3><a href="/diseaseview/?name={{disease.name}}">{{disease.name}}</a></h3>
     </div>
 </article>
 {% else %}
