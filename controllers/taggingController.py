@@ -1,3 +1,5 @@
+"""Tagging controller is deprecated.
+Allows basic tagging of SNPs only"""
 
 from util import AppRequestHandler
 from models.snp import snp
@@ -5,7 +7,9 @@ from models.snp_url import snp_url
 from models.domain_tag import domain_tag
 
 class addTag(AppRequestHandler):
+    """Tag request handler"""
     def get(self):
+        """List tags"""
         # Get tags logic
         snpStr = self.request.get("snp").lstrip('rsRS')
         # Get if exists, make dummy if not
@@ -16,6 +20,7 @@ class addTag(AppRequestHandler):
         self.out({'tags':tags, 'snp':snpObj})
 
     def post(self):
+        """Add tag via POST params; snp and tag"""
         # Add tag logic
         snpStr = self.request.get("snp")
         tagStr = self.request.get("tag")

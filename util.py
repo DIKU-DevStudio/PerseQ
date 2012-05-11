@@ -1,3 +1,5 @@
+"""Utility functionality used across multiple controllers"""
+
 from google.appengine.ext import webapp
 from jinja2 import Environment, FileSystemLoader
 import os
@@ -59,7 +61,8 @@ def reset():
 
 
 def populate(path="gwascatalog.txt", limit=200):
-    docs = csv.DictReader(open('gwascatalog.txt','rb'), dialect='excel-tab')
+    """Populate the database with data from gwascatalog.txt"""
+    docs = csv.DictReader(open(path,'rb'), dialect='excel-tab')
     pubids = {}
     for doc in docs:
         pubid = doc["PUBMEDID"]
@@ -210,6 +213,7 @@ def populate(path="gwascatalog.txt", limit=200):
     print "done"
 
 def purge():
+    """Clear the database to make ready for (re-)population"""
     for model in ["Snp", "Gene", "GWAS", "Study", "Disease"]:
         try:
             while True:
@@ -222,8 +226,8 @@ def purge():
             pass
     print "done"
 
-# given list of snpids - returns the list of related OMIM IDs
 def snp_omim(snpids=None):
+    """given list of snpids - returns the list of related OMIM IDs"""
     if not snpids:
         return []
 
@@ -245,18 +249,19 @@ def snp_omim(snpids=None):
     return omim_ids
 
 def omim_efetch(db=None, ids=None):
+    """Omin fetch"""
     handle = Entrez.efetch(db=db, id=ids, retmode="xml")
     pubs = Entrez.read(handle)
     handle.close()
     print pubs
 
 
-'''
-Template helper, sets the template base path
-and uses a given renderer on the template.
-'''
 class jTemplate():
-    _e = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
+    """Template helper, sets the template base path and uses a given renderer on
+    the template."""
+
+    _e = Environment(loader=FileSystemLoader(os.path.join(
+        os.path.dirname(__file__), 'templates')))
 
     @staticmethod
     def render(template, variables, printer):
@@ -266,6 +271,7 @@ class jTemplate():
 import StringIO
 
 class AppRequestHandler(webapp.RequestHandler):
+    """Base class for controllers"""
     _template = None
 
     def render(self, dictionary={}, template=None):
@@ -283,9 +289,11 @@ class AppRequestHandler(webapp.RequestHandler):
         return output.getvalue()
 
     def setTemplate(self, template):
+        """Set the template to be used for calls rendering"""
         self._template = template
 
     def out(self, dictionary = {}):
+        """Render the template, passing a dict as inputs"""
         if(self._template == None):
             # Get template from controller / method names
             actionName = self.__class__.__name__
@@ -298,6 +306,8 @@ class AppRequestHandler(webapp.RequestHandler):
         jTemplate.render(self._template, dictionary, self.response.out.write)
 
     def toJson(self, dictionary, prettify = False):
+        """Display JSON data template.
+        Prettify flag tells whether to use the google code prettify markup"""
         data = {"json": json.dumps(dictionary)}
         if prettify:
             jTemplate.render("data/prettify/json.html", data , self.response.out.write);
@@ -305,6 +315,8 @@ class AppRequestHandler(webapp.RequestHandler):
             jTemplate.render("data/json.html", data , self.response.out.write);
 
     def toXML(self, xml, prettify = False):
+        """Display XML data template.
+        Prettify flag tells whether to use the google code prettify markup"""
         data = {'xml':xml}
         if prettify:
             jTemplate.render("data/prettify/xml.html", data, self.response.out.write);
