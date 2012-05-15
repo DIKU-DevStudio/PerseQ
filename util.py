@@ -6,6 +6,7 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache, users
 from datetime import datetime
+from models.users import UserData
 
 from Bio import Entrez
 import StringIO
@@ -291,7 +292,7 @@ class AppRequestHandler(webapp.RequestHandler):
             actionName = self.__class__.__name__
             self._template = actionName+".html"
 
-        dictionary['user'] = users.get_current_user()
+        dictionary['user'] =  UserData.current()
         dictionary['user_logout'] = users.create_logout_url('/')
         dictionary['user_login'] = users.create_login_url('/')
         dictionary['user_admin'] = users.is_current_user_admin()
