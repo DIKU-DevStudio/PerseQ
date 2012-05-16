@@ -5,7 +5,8 @@ from google.appengine.api import users
 from google.appengine.ext import db
 
 class UserData(db.Model):
-    # derived from https://khanacademy.kilnhg.com/Code/Website/Group/stable/File/user_models.py?rev=tip
+    """UserData model derived from
+    https://khanacademy.kilnhg.com/Code/Website/Group/stable/File/user_models.py?rev=tip"""
 
     # do not reference this directly
     user = db.UserProperty()

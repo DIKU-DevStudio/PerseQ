@@ -1,8 +1,6 @@
-###
-# Controller containing logic for requests to different SNP databases
-# 
-#
-###
+"""
+Controller containing logic for requests to different SNP databases
+"""
 
 from util import AppRequestHandler
 from Bio import Entrez
@@ -16,7 +14,9 @@ Entrez.email = 'pamad05+entrez@gmail.com'
 # - 'abstracts' is a list of abstracts with a possible label. Ex: {label:"intro", "text":"<abstract_text>"}
 # - 'PMID' (PubMed ID) of article
 class pubmed(AppRequestHandler):
+    """Pubmed request handler"""
     def get(self):
+        """Get all articles referencing a given SNP by snp GET param"""
         self.setTemplate('data/pubmeds.html')
         snp = self.request.get("snp")
         if snp == "":
@@ -77,7 +77,9 @@ class pubmed(AppRequestHandler):
         self.out({'pubmeds': articles})
 
 class dbSNP(AppRequestHandler):
+    """DbSNP request handler"""
     def get(self):
+        """Lookup dbSNP xml via snp GET param"""
         snp = self.request.get("snp")
         if snp == "":
             self.out({'error':'No SNP_id provided'})

@@ -1,7 +1,6 @@
-###
-# Controller for main presentation
-#
-###
+"""
+Controller for main presentation of GWAS data
+"""
 from util import AppRequestHandler
 from models.users import UserData
 from models.study import Study, Disease, Gene
@@ -13,8 +12,8 @@ from google.appengine.api import memcache
 from google.appengine.ext import db
 
 class diseaseList(AppRequestHandler):
-    _template = "baserender.html"
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
+    _template = "baserender.html"
     def get(self):
         # if we need to filter later on..
         filter = self.request.get("filter") # returns name of disease to filter on
@@ -38,8 +37,8 @@ class diseaseList(AppRequestHandler):
         self.out({"rendered":rendered})
 
 class diseaseView(AppRequestHandler):
-    _template = "baserender.html"
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
+    _template = "baserender.html"
     def get(self, name):
         #name = self.request.get("name") # returns name of disease to filter on
         if name is None:
@@ -63,6 +62,7 @@ class diseaseView(AppRequestHandler):
         self.out({"rendered":rendered})
 
 class studyList(AppRequestHandler):
+    """Show a list of studies"""
     _template = 'baserender.html'
     def get(self):
         # check memcache for main
@@ -88,6 +88,7 @@ class studyList(AppRequestHandler):
         # self.out({'studies': studies})
 
 class studyView(AppRequestHandler):
+    """View a particular study"""
     def get(self, i):
         self.setTemplate('studyview.html')
         study = Study.gql("WHERE pubmed_id = :1", i).get()
@@ -108,6 +109,7 @@ class studyView(AppRequestHandler):
         self.out({'study': study})
 
 class genePresenter(AppRequestHandler):
+    """View a particular gene"""
     _template = 'gene.html'
     def get(self, gene):
         gene = Gene.gql("WHERE name = :1", gene).get()
@@ -128,6 +130,7 @@ class genePresenter(AppRequestHandler):
         self.out({'gene':gene})
 
 class commentHandler(AppRequestHandler):
+    """Util comment actions"""
     def get(self, comment):
         """ Delete comment via GET """
         user = UserData.current()
