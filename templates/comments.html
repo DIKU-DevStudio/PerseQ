@@ -18,7 +18,7 @@
             <a href="#">{{comment.user.nickname()}}</a>
           </div>
           <div class="span9 {% if comment.user.user_id == user.user_id %}edit_area{% endif %}" id="{{comment.key()}}">{{comment.body}}</div>
-          {% if comment.user.user_id == user.user_id %}
+          {% if comment.user.user_id == user.user_id or user.moderator or user.developer %}
             <a href="javascript:void(0);" class="editLink">edit</a>
             <a href="javascript:void(0);" class="deleteLink">delete</a>
           {% endif %}
