@@ -1,0 +1,44 @@
+<div id="comments" class="" style="padding-left:30px;border:1px solid #eee;">
+    <h3>Post comment</h3>
+    <form id="commentform" method="POST">
+        <label>Comment</label>
+        <textarea name="comment"></textarea>
+        <label>Rating</label>
+        <input type="text" />
+        <input type="submit" value="Submit" />
+    </form>
+
+    <h3 id="comments-title">{{comments.count()}} Comments</h3>
+    <ol class="commentlist" style="margin-left:0;list-style:none;">
+        {% for comment in comments %}
+        <li class="row">
+          <div class="span2">
+            <img src="/img/person.png" style="float:left; padding: 5px;"/>
+            <time>{{comment.date}}</time><br />
+            <a href="#">{{comment.user.nickname()}}</a>
+          </div>
+          <div class="span9 {% if comment.user.user_id == user.user_id %}edit_area{% endif %}" id="{{comment.key()}}">{{comment.body}}</div>
+          {% if comment.user.user_id == user.user_id or user.moderator or user.developer %}
+            <a href="javascript:void(0);" class="editLink">edit</a>
+            <a href="javascript:void(0);" class="deleteLink">delete</a>
+          {% endif %}
+        </li>
+
+        {% endfor %}
+    </ol>
+</div>
+<script src="/js/jquery.jeditable.mini.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.editLink').click(function() {
+            var body = $(this).siblings('.edit_area')
+            body.editable('/comment/'+body.attr('id')+'/edit').click();
+
+        });
+        $('.deleteLink').click(function() {
+            var body = $(this).siblings('.edit_area')
+            $.get('/comment/'+body.attr('id')+'/delete');
+            $(this).parent().hide();
+        });
+    });
+</script>

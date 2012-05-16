@@ -105,7 +105,7 @@ class studyView(AppRequestHandler):
         comment.date = datetime.now()
         comment.put()
 
-        self.out({'studies': [study]})
+        self.out({'study': study})
 
 class genePresenter(AppRequestHandler):
     _template = 'gene.html'
@@ -121,7 +121,7 @@ class genePresenter(AppRequestHandler):
         comment = Comment()
         comment.gene = gene.key()
         comment.body = self.request.get("comment")
-        comment.user = users.get_current_user()
+        comment.user = UserData.current().user_id #users.get_current_user()
         comment.date = datetime.now()
         comment.put()
 
@@ -129,12 +129,28 @@ class genePresenter(AppRequestHandler):
 
 class commentHandler(AppRequestHandler):
     def get(self, comment):
-        if users.is_current_user_admin():
-            comment = Comment.get_by_key(comment)
+        """ Delete comment via GET """
+        user = UserData.current()
+        comment = Comment.get(comment)
+        if user.developer or user.moderator \
+                or user.user_id == comment.user.user_id:
             comment.delete()
+            self.response.out.write("Deleted")
+
+class commentEditor(AppRequestHandler):
+    def post(self, comment):
+        """ Edit comment via POST """
+        comment = Comment.get(comment)
+        if UserData.current().user_id == comment.user.user_id:
+            comment.body = self.request.get('value')
+            comment.put()
+            self.response.out.write(comment.body)
+
 
 __routes__ = [('/studies/', studyList),
               ('/study/(.*)', studyView),
+              ('/comment/(.*)/delete', commentHandler),
+              ('/comment/(.*)/edit', commentEditor),
               ('/diseases/', diseaseList),
               ('/disease/(.*)', diseaseView),
               ('/gene/(.*)',  genePresenter)]
