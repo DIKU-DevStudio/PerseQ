@@ -114,7 +114,7 @@ class genePresenter(AppRequestHandler):
     def get(self, gene):
         gene = Gene.gql("WHERE name = :1", gene).get()
 
-        self.out({'gene':gene})
+        self.out(gene=gene)
 
     # Comment on a gene via POST
     def post(self, gene):

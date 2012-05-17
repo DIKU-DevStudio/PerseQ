@@ -282,7 +282,6 @@ class AppRequestHandler(webapp2.RequestHandler):
         if template is None:
             raise Exception("No 'template' argument to render from")
         temp = env.get_template(template)
-        output = StringIO.StringIO()
         return temp.render(**args)
 
     # def render_old(self, dictionary={}, template=None):
@@ -314,7 +313,9 @@ class AppRequestHandler(webapp2.RequestHandler):
         dictionary['user_logout'] = users.create_logout_url('/')
         dictionary['user_login'] = users.create_login_url('/')
         dictionary['user_admin'] = users.is_current_user_admin()
-        jTemplate.render(self._template, dictionary, self.response.write)
+
+        temp = env.get_template(self._template)
+        self.response.write(temp.render(dictionary))
 
     def toJson(self, dictionary, prettify = False):
         """Display JSON data template.
