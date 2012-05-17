@@ -14,18 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import util
-from google.appengine.api import users
+# from google.appengine.ext import webapp
+# from google.appengine.ext.webapp import util
+# from google.appengine.api import users
 
-import logging
+# import logging
 import controllers
+from webapp2 import WSGIApplication
 
-def main():
-    #logging.info("Active routes: "+str(controllers.__routes__))
-    application = webapp.WSGIApplication(controllers.__routes__,
-                                         debug=True)
-    util.run_wsgi_app(application)
+app = WSGIApplication(controllers.__routes__, debug=True)
 
-if __name__ == '__main__':
-    main()
+# def main():
+#     #logging.info("Active routes: "+str(controllers.__routes__))
+#     application = webapp.WSGIApplication(controllers.__routes__,
+#                                          debug=True)
+#     util.run_wsgi_app(application)
+
+# if __name__ == '__main__':
+#     main()

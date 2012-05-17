@@ -19,7 +19,7 @@ handlers:
   static_dir: bootstrap/img
 
 - url: .*
-  script: main.py
+  script: main.app
   login: required
 
 libraries:

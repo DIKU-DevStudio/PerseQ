@@ -1,6 +1,7 @@
 """Utility functionality used across multiple controllers"""
 
-from google.appengine.ext import webapp
+# from google.appengine.ext import webapp
+import webapp2
 from jinja2 import Environment, FileSystemLoader
 import os
 import json
@@ -269,33 +270,42 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
-import StringIO
+# import StringIO
+env = Environment(loader=FileSystemLoader(os.path.join(
+        os.path.dirname(__file__), 'templates')))
 
-class AppRequestHandler(webapp.RequestHandler):
+class AppRequestHandler(webapp2.RequestHandler):
     """Base class for controllers"""
     _template = None
 
-    def render(self, dictionary={}, template=None):
-        """returns the rendered html for easy caching"""
-        if self._template is None:
-            # Get template from controller / method names
-            actionName = self.__class__.__name__
-            self._template = actionName+".html"
+    def render(self, template = None, **args):
+        if template is None:
+            raise Exception("No 'template' argument to render from")
+        temp = env.get_template(template)
         output = StringIO.StringIO()
-        if template is not None:
-            jTemplate.render(template, dictionary, output.write)
-        else:
-            jTemplate.render(self._template, dictionary, output.write)
+        return temp.render(**args)
+
+    # def render_old(self, dictionary={}, template=None):
+    #     """returns the rendered html for easy caching"""
+    #     if self._template is None:
+    #         # Get template from controller / method names
+    #         actionName = self.__class__.__name__
+    #         self._template = actionName+".html"
+    #     output = StringIO.StringIO()
+    #     if template is not None:
+    #         jTemplate.render(template, dictionary, output.write)
+    #     else:
+    #         jTemplate.render(self._template, dictionary, output.write)
         
-        return output.getvalue()
+    #     return output.getvalue()
 
     def setTemplate(self, template):
         """Set the template to be used for calls rendering"""
         self._template = template
 
-    def out(self, dictionary = {}):
+    def out(self, **dictionary):
         """Render the template, passing a dict as inputs"""
-        if(self._template == None):
+        if self._template is None:
             # Get template from controller / method names
             actionName = self.__class__.__name__
             self._template = actionName+".html"
@@ -304,7 +314,7 @@ class AppRequestHandler(webapp.RequestHandler):
         dictionary['user_logout'] = users.create_logout_url('/')
         dictionary['user_login'] = users.create_login_url('/')
         dictionary['user_admin'] = users.is_current_user_admin()
-        jTemplate.render(self._template, dictionary, self.response.out.write)
+        jTemplate.render(self._template, dictionary, self.response.write)
 
     def toJson(self, dictionary, prettify = False):
         """Display JSON data template.
