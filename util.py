@@ -284,20 +284,6 @@ class AppRequestHandler(webapp2.RequestHandler):
         temp = env.get_template(template)
         return temp.render(**args)
 
-    # def render_old(self, dictionary={}, template=None):
-    #     """returns the rendered html for easy caching"""
-    #     if self._template is None:
-    #         # Get template from controller / method names
-    #         actionName = self.__class__.__name__
-    #         self._template = actionName+".html"
-    #     output = StringIO.StringIO()
-    #     if template is not None:
-    #         jTemplate.render(template, dictionary, output.write)
-    #     else:
-    #         jTemplate.render(self._template, dictionary, output.write)
-        
-    #     return output.getvalue()
-
     def setTemplate(self, template):
         """Set the template to be used for calls rendering"""
         self._template = template
