@@ -1,7 +1,7 @@
 """Tagging controller is deprecated.
 Allows basic tagging of SNPs only"""
 
-from util import AppRequestHandler
+from Util import AppRequestHandler
 from models.snp import snp
 from models.snp_url import snp_url
 from models.domain_tag import domain_tag

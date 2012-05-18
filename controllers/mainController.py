@@ -1,7 +1,8 @@
-"""
-Controller for main presentation
-"""
-from util import AppRequestHandler
+###
+# Controller for main presentation
+#
+###
+from Util import AppRequestHandler
 from models.snp import snp
 from models.users import UserData
 

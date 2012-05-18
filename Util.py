@@ -4,16 +4,16 @@
 import webapp2
 from jinja2 import Environment, FileSystemLoader
 import os
-import json
+import simplejson
 import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache, users
 from datetime import datetime
 from models.users import UserData
+from models.study import Study, GWAS, Gene, Snp, Disease
 
 from Bio import Entrez
 import StringIO
-from models.study import Study, GWAS, Gene, Snp, Disease
 
 import csv
 from google.appengine.api import memcache
@@ -279,10 +279,6 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
-# import StringIO
-env = Environment(loader=FileSystemLoader(os.path.join(
-        os.path.dirname(__file__), 'templates')))
-
 class AppRequestHandler(webapp2.RequestHandler):
     """Base class for controllers"""
     _template = None
@@ -315,7 +311,8 @@ class AppRequestHandler(webapp2.RequestHandler):
     def toJson(self, dictionary, prettify = False):
         """Display JSON data template.
         Prettify flag tells whether to use the google code prettify markup"""
-        data = {"json": json.dumps(dictionary)}
+        enc = simplejson.JSONEncoder()
+        data = {"json": enc.encode(dictionary)}
         if prettify:
             jTemplate.render("data/prettify/json.html", data , self.response.out.write);
         else:
@@ -328,4 +325,4 @@ class AppRequestHandler(webapp2.RequestHandler):
         if prettify:
             jTemplate.render("data/prettify/xml.html", data, self.response.out.write)
         else:
-            jTemplate.render("data/xml.html", data,self.response.out.write )
+            jTemplate.render("data/xml.html", data,self.response.out.write );

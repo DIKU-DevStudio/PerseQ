@@ -1,11 +1,12 @@
 from google.appengine.ext import db
+from models.Application import AppModel
 
-class Disease(db.Model):
+class Disease(AppModel):
     """For viewing a unique list of diseases, we need a disease to be a relation and not just a textfield"""
     name = db.StringProperty(required=True)
 
 # PK = pubmed_id
-class Study(db.Model):
+class Study(AppModel):
     """A list of all the PubMed publications, referencing a disease and being referenced by all the GWAS for that publication"""
     # 3
     date = db.DateProperty()
@@ -33,7 +34,7 @@ class Study(db.Model):
 
 # id NCBI gene_id
 # handle relations with ancestors
-class Gene(db.Model):
+class Gene(AppModel):
     """Unique list of gene-names and gene-ids"""
     studies = db.ListProperty(db.Key) # keys of studies
     diseases = db.ListProperty(db.Key) # keys of diseases
@@ -42,7 +43,7 @@ class Gene(db.Model):
     geneid = db.StringProperty(required=True)
 
 # id = SNPID
-class Snp(db.Model):
+class Snp(AppModel):
     """Unique list of SNP-ids (no names)"""
     studies = db.ListProperty(db.Key)
     diseases = db.ListProperty(db.Key)
@@ -53,7 +54,7 @@ class Snp(db.Model):
 
 # ID = random
 # ancestor=study_id == pubmed_id
-class GWAS(db.Model):
+class GWAS(AppModel):
     """The list of GWAS from a given publication
 
     """

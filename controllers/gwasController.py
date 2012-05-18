@@ -1,7 +1,8 @@
-"""
-Controller for main presentation of GWAS data
-"""
-from util import AppRequestHandler
+###
+# Controller for main presentation
+#
+###
+from Util import AppRequestHandler
 from models.users import UserData
 from models.study import Study, Disease, Gene
 from models.annotation import Comment

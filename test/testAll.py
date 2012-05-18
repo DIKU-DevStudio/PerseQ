@@ -16,7 +16,7 @@ from models.snp import snp
 
 from models.study import Snp, Gene, Study, GWAS
 
-from util import populate
+from Util import populate
 
 # test get_or_insert
 class DemoTestCase(unittest2.TestCase):
