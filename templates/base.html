@@ -13,7 +13,7 @@
 
         <link href="/css/prettify.css" rel="stylesheet" />
         <script src="/js/prettify.js"></script>
-        <title>{% block title %}{% endblock %} - PerseQ</title>
+        <title>PerseQ - {% block title %}{% endblock %}</title>
         {% block head %}
         {% endblock %}
     </head>
@@ -28,10 +28,9 @@
                     <div class="nav-collapse">
                         <ul class="nav">
                             <li><a href="/">Home</a></li>
+                            <li><a href="/search/">Search</a></li>
                             <li><a href="/diseases/">Diseases</a></li>
                             <li><a href="/studies/">Studies</a></li>
-                            <li><a href="/about/">About</a></li>
-                            <li><a href="#">Help</a></li>
                         </ul>
                         <ul class="nav pull-right">
                             <li><p class="navbar-text">{{user.nickname()}}</p></li>
@@ -52,7 +51,7 @@
         </div>
         <div id="footer" class="container">
             {% block footer %}
-            &copy; Copyright 2012 PerseQ
+            &copy; Made in Denmark, 2012. The data shown on this website is obtained from various online sources. We cannot be held responsible for any errors in the data shown.
             {% endblock %}
         </div>
     </body>
