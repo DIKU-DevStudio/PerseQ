@@ -8,17 +8,21 @@ from models.users import UserData
 
 from models.study import Snp
 
-class diseaseByCollection(AppRequestHandler):
+class diseasesGroupedBySNPs(AppRequestHandler):
     _template = "baserender.html"
 
     def get(self, collection_id):
         # snp_disease_collection for diseases grouped by snp
-        render = memcache.get(collection_id, namespace="snp_disease_collection")
-        if render is None:
-            coll = db.get(db.Key.from_path("SNPCollection", collection_id))
-            snps = db.get(coll.snps)
-            render = self.render("diseasebysnp.html", snps=snps)
-            memcache.set(cache_key, render, namespace="diseasebysnp")
+        # render = memcache.get(collection_id, namespace="snp_disease_collection")
+        # if render is None:
+        user = UserData.current()
+        # coll = db.get(db.Key.from_path("SNPCollection", collection_id, parent=user.key()))
+        coll = SNPCollection.all().ancestor(user).filter("name =", collection_id).get()
+        
+        snps = db.get(coll.snps)
+        logging.info(dir(snps[0]))
+        render = self.render("snp_disease_collection.html", snps=snps)
+        # memcache.set(collection_id, render, namespace="snp_disease_collection")
 
         self.out(rendered=render)
 
@@ -145,5 +149,6 @@ class EditCollection(AppRequestHandler):
 
 __routes__ = [('/collection/(.*)',Collection),
               ('/collections/',CollectionList),
-              ('/editcollection/(.*)', EditCollection)]
+              ('/editcollection/(.*)', EditCollection),
+              ('/diseases/groupebysnps/(.*)',diseasesGroupedBySNPs)]
 # __routes__ = []
