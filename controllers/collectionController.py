@@ -8,6 +8,20 @@ from models.users import UserData
 
 from models.study import Snp
 
+class diseaseByCollection(AppRequestHandler):
+    _template = "baserender.html"
+
+    def get(self, collection_id):
+        # snp_disease_collection for diseases grouped by snp
+        render = memcache.get(collection_id, namespace="snp_disease_collection")
+        if render is None:
+            coll = db.get(db.Key.from_path("SNPCollection", collection_id))
+            snps = db.get(coll.snps)
+            render = self.render("diseasebysnp.html", snps=snps)
+            memcache.set(cache_key, render, namespace="diseasebysnp")
+
+        self.out(rendered=render)
+
 class CollectionList(AppRequestHandler):
     _template = "baserender.html"
     def get(self):
