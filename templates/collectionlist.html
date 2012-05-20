@@ -1,0 +1,18 @@
+<h2>SNP Collection</h2>
+{% for coll in collections %}
+<article class="row">
+    <div class="span">
+    <h3>
+        <a href="/collection/{{coll.name}}">{{coll.name}}</a>
+    </h3>
+    </div>
+</article>
+{% else %}
+<article class="row">
+<div class="span10">
+    <h3>
+        <h3>No collections</h3>
+    </h3>
+</div>
+</article>
+{% endfor %}

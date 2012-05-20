@@ -10,6 +10,7 @@ from google.appengine.ext import db
 from google.appengine.api import memcache, users
 from datetime import datetime
 from models.users import UserData
+from models.collection import SNPCollection
 
 from Bio import Entrez
 import StringIO
@@ -216,7 +217,7 @@ def populate(path="gwascatalog.txt", limit=200):
 
 def purge():
     """Clear the database to make ready for (re-)population"""
-    for model in ["Snp", "Gene", "GWAS", "Study", "Disease"]:
+    for model in ["Snp", "Gene", "GWAS", "Study", "Disease", "UserData", "SNPCollection"]:
         try:
             while True:
                 q = db.GqlQuery("SELECT __key__ FROM %s" % model)

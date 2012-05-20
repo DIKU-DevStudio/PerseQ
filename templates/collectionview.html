@@ -1,0 +1,19 @@
+<h2>SNP Collection: {{collection.name}} ({{collection.count}})</h2>
+<a class="btn" href="/editcollection/{{collection.name}}">add snps</a>
+{% for snp in collection.snps %}
+<article class="row">
+    <div class="span10">
+    <h3>
+        {{snp.name()}}
+    </h3>
+    </div>
+</article>
+{% else %}
+<article class="row">
+<div class="span10">
+    <h3>
+        <h3>No SNPs</h3>
+    </h3>
+</div>
+</article>
+{% endfor %}
