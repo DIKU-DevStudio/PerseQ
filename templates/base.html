@@ -45,14 +45,18 @@
 
         <div id="content" class="container">
             <!-- show errors -->
+            {% if error %}
             {% for err in error %}
                 <span class="label label-important">{{err}}</span>
             {% endfor %}
+            {% endif %}
             </br>
             <!-- show warning -->
+            {% if warning %}
             {% for war in warning %}
                 <span class="label label-warning">{{war}}</span>
             {% endfor %}
+            {% endif %}
 
             {% block content %}
             {% endblock %}

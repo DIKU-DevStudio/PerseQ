@@ -27,6 +27,7 @@ class Collection(AppRequestHandler):
         """view or create specified collection"""
         if collection_name == "":
             self.redirect("/collections/")
+            return
 
         # login is mandatory
         # user = users.get_current_user()
@@ -56,6 +57,7 @@ class EditCollection(AppRequestHandler):
             logging.info("redirecting")
             # if collection doesn't exist - redirect to list of collections
             self.redirect("/collections/")
+            return
 
         # we support a number of actions
         # addsnps = add a list of snps to a collection
@@ -102,8 +104,8 @@ class EditCollection(AppRequestHandler):
         # all 'None' keys are from ids unknown to GWAS, compile a list of these
 
         unknown_keys = [snpids[i] for i in xrange(len(snp_keys)) if snp_keys[i] is None]
-        if len(unknown_keys) > 0:
-            warning.append("following keys were unknown to GWAS catalog: %s" % unknown_keys)
+        if unknown_keys:
+            warning.append("Keys unknown to the GWAS catalog: %s" % unknown_keys)
 
         # add keys to collection
         # list = [snp.key() for snp in snp_keys if snp]
