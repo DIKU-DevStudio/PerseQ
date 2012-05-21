@@ -2,8 +2,9 @@
     <div class="span9">
     	<h2> <a href="/collections/">Collections</a> > <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> > SNPs</h2>
       <form class="well form-inline" type="post" action="/addsnps/{{collection.name}}">
-  <input id="snps" name="snps" type="text" class="input-small span8" placeholder="write comma-seperated snpids: 10260404,3825776,12284594,7041847,16955379,rs1805007,12345">
-  <button type="submit" class="btn">Add</button>
+      <p><small>paste comma-seperated snpids: 10260404,3825776,12284594,7041847,16955379,rs1805007,12345</small></p>
+        <input id="snps" name="snps" type="text" class="input-small span8" placeholder="Add snps to collection">
+        <button type="submit" class="btn">Add</button>
 </form>
     	{% if collection.snps %}
     	<table class="table">
