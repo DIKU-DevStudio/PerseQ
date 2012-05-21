@@ -7,13 +7,14 @@ import os
 import simplejson
 import logging
 from google.appengine.ext import db
-from google.appengine.api import memcache, users
+from google.appengine.api import memcache, users, search
 from datetime import datetime
 from models.users import UserData
 from models.study import Study, GWAS, Gene, Snp, Disease
 
 from Bio import Entrez
 import StringIO
+
 
 import csv
 from google.appengine.api import memcache
@@ -23,6 +24,29 @@ def reset():
     """
     memcache.flush_all()
 
+def AddStudyDocument(study):
+    doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
+        fields=[
+            search.TextField(name='name', value=study.name),
+            search.TextField(name='disease_trait', value=study.disease_trait),
+            search.TextField(name='abstract', value=study.abstract)
+            ])
+    search.Index(name=study._index).add(doc)
+
+def AddSNPDocument(snp):
+    doc = search.Document(
+        fields=[
+            search.TextField(name='snpid', value=snp.snpid),
+            ])
+    search.Index(name=study._index).add(doc)
+
+def AddGeneDocument(gene):
+    doc = search.Document(doc_id=gene.geneid,
+        fields=[
+            search.TextField(name='name', value=gene.name),
+            search.TextField(name='alias', value=str(gene.alias)),
+            ])
+    search.Index(name=gene._index).add(doc)
 
 def populate(path="gwascatalog.txt", limit=100):
     """Populate the database with data from gwascatalog.txt - one hell of an import!
@@ -101,7 +125,8 @@ def populate(path="gwascatalog.txt", limit=100):
         study.repl_sample= rel["Replication Sample Size"].strip()
         study.platform = rel["Platform [SNPs passing QC]"].strip()
         study.put()
-        
+        AddStudyDocument(study)
+
         for rel in line:
             # A gwas has either a direct gene or a 
             # down-stream and up-stream gene
@@ -127,17 +152,18 @@ def populate(path="gwascatalog.txt", limit=100):
                         if not disease.key() in gene.diseases:
                             gene.diseases.append(disease.key())
                         gene.put()
+                        AddGeneDocument(gene)
             else:
                 # up and downstream genes must be set
                 down_id = rel["Downstream_gene_id"].strip()
-                up_id = rel["Upstream_gene_id"].strip() 
+                up_id = rel["Upstream_gene_id"].strip()
 
                 if up_id != "" and down_id != "":
                     up_down_names = rel["Mapped_gene"].split(" - ")
                     if len(up_down_names) < 2:
                         # gene = NR / NS or whatever..
                         up_down_names = ["N/A", "N/A"]
-                    
+
                     # create upstream gene
                     up_name = up_down_names[0]
                     down_name = up_down_names[1]
@@ -175,11 +201,10 @@ def populate(path="gwascatalog.txt", limit=100):
                     if not disease.key() in snp.diseases:
                         snp.diseases.append(disease.key())
                     snp.put()
+                    AddSnpDocument(snp)
                 except:
                     # haplotype?
                     snpid = "N/A"
-            else:
-                "N/A"
             # if no gene or snp relation is mentioned - ignore and just insert study
             if (gene is None or up_gene is None) and snp is None:
                 print "skipping gwas"
@@ -203,7 +228,7 @@ def populate(path="gwascatalog.txt", limit=100):
             gwas.p_string = rel["p-Value"].strip()
             # could be none
             gwas.snps = snpid
-            
+
             # parse out the exponent: 6E-8 => -8
             try:
                 # test that p-Value is actually a float before parsing out
@@ -232,7 +257,6 @@ def purge():
                 q = db.GqlQuery("SELECT __key__ FROM %s" % model)
                 assert q.count()
                 db.delete(q.fetch(200))
-                # time.sleep(0.5)
         except Exception, e:
             print e
             pass
@@ -279,6 +303,8 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
+env = Environment(loader=FileSystemLoader(os.path.join(
+            os.path.dirname(__file__), 'templates')))
 class AppRequestHandler(webapp2.RequestHandler):
     """Base class for controllers"""
     _template = None
@@ -326,3 +352,4 @@ class AppRequestHandler(webapp2.RequestHandler):
             jTemplate.render("data/prettify/xml.html", data, self.response.out.write)
         else:
             jTemplate.render("data/xml.html", data,self.response.out.write );
+

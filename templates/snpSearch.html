@@ -59,16 +59,25 @@ Search for a SNP
         loadResult('/search/disease/'+val, loadDisease, 'disease');
         loadResult('/search/study/'+val, loadStudy, 'study');
     }
-    {% if search %}
     $(document).ready(function() {
-       omnify();     
+        {% if search %}
+        loadResults();
+        {% endif %}
+
+        $('#loading').text("No results loaded")
+            .ajaxStart(function() {
+                $(this).show().text("Loading results...");
+            })
+            .ajaxStop(function() {
+                $(this).text("Search complete.");
+            })
+        ;   
     });
-    {% endif %}
 </script>
 {% endblock %}
 
 {% block content %}
-<form class="well form-vertical" action="" onsubmit="omnify(); return false;">
+<form class="well form-vertical" action="" onsubmit="loadResults(); return false;">
     <div class="row-fluid">
         <div class="span7">
             <p>Search for diseases, SNPs, genes or tags.</p>
@@ -87,6 +96,8 @@ Search for a SNP
 
 <div class="row span12">
     <h3><small>Results</small></h3>
+    <div id="loading"><p>Load</p></div>
+
     <div class="btn-group" data-toggle="buttons-checkbox">
         <div class="btn"><span id="snp_count">0</span> SNPs</div>
         <div class="btn"><span id="gene_count">0</span> Genes</div>

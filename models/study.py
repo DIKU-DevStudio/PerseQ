@@ -5,6 +5,9 @@ class Disease(AppModel):
     """For viewing a unique list of diseases, we need a disease to be a relation and not just a textfield"""
     name = db.StringProperty(required=True)
 
+
+    _index = 'Diseases'
+
 # PK = pubmed_id
 class Study(AppModel):
     """A list of all the PubMed publications, referencing a disease and being referenced by all the GWAS for that publication"""
@@ -27,10 +30,14 @@ class Study(AppModel):
     # 9
     repl_sample = db.StringProperty()
     platform = db.StringProperty()
-
+    
     @property
     def genes(self):
         return Gene.gql("WHERE studies = :1", self.key())
+
+    """Document index for search"""
+    _index = 'Studies'
+
 
 # id NCBI gene_id
 # handle relations with ancestors
@@ -42,6 +49,9 @@ class Gene(AppModel):
     name = db.StringProperty()
     geneid = db.StringProperty(required=True)
 
+    """Document index for search"""
+    _index = 'Genes'
+
 # id = SNPID
 class Snp(AppModel):
     """Unique list of SNP-ids (no names)"""
@@ -51,6 +61,12 @@ class Snp(AppModel):
     gene = db.ReferenceProperty(Gene,
             collection_name='snps')
     snpid = db.StringProperty(indexed=True) # rs1805007
+
+    """Document index for search"""
+    _index = 'SNPs'
+
+    """Document index for search"""
+    _index = 'SNPs'
 
 # ID = random
 # ancestor=study_id == pubmed_id
@@ -88,3 +104,6 @@ class GWAS(AppModel):
     strongest_snp_risk_allele = db.StringProperty()
     # 25 - 1=no, 2=yes
     intergenic = db.BooleanProperty()
+
+    """Document index for search"""
+    _index = 'GWAS'
