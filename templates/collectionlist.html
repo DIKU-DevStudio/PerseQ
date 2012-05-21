@@ -1,4 +1,8 @@
 <h2>SNP Collections</h2>
+<form class="well form-inline" type="post" action="/collection/">
+  <input id="name" name="name" type="text" class="input-small span10" placeholder="new collection..">
+  <button type="submit" class="btn">Create</button>
+</form>
 {% if collections %}
 <table class="table">
     <thead><tr>
@@ -10,9 +14,14 @@
     <tbody>
 	{% for coll in collections %}					
 		<tr>
-			<td><h4><a href="/collection/{{coll.name}}">{{coll.name}}</h4></td>
+			<td><h4><a href="/collection/?name={{coll.name}}">{{coll.name}}</h4></td>
 			<td>{{coll.count}}</td>
-			<td><a href="/deletecollection/{{coll.name}}">Delete</a></td>
+			<td>
+				<form type="post" action="/deletecollection/{{coll.name}}">
+  					<button type="submit" class="btn-mini">Delete</button>
+				</form>
+				<!-- <a class="btn" href=>Delete</a> -->
+			</td>
 		</tr>
 	{% endfor %}
 	</tbody>

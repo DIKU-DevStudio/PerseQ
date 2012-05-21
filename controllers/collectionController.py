@@ -23,7 +23,7 @@ class diseasesGroupedBySNPs(AppRequestHandler):
             return
 
         snps = db.get(coll.snps)
-        render = self.render("snp_disease_collection.html", snps=snps)
+        render = self.render("snp_disease_collection.html", snps=snps, collection=coll)
         # memcache.set(collection_id, render, namespace="snp_disease_collection")
 
         self.out(rendered=render)
@@ -43,8 +43,9 @@ class CollectionList(AppRequestHandler):
 class Collection(AppRequestHandler):
     """controller handling the creation and presentation of collections"""
     _template = "baserender.html"
-    def get(self, collection_name):
+    def get(self):
         """view or create specified collection"""
+        collection_name = self.request.get("name")
         if collection_name == "":
             self.redirect("/collections/")
             return
@@ -58,7 +59,7 @@ class Collection(AppRequestHandler):
             coll = SNPCollection(parent=user, name=collection_name)
             coll.put()
             # had issues with the instance not being ready, forces it to do a query for it
-            coll = db.get(coll.key())
+            # coll = db.get(coll.key())
 
         # coll = SNPCollection.get_or_insert(parent=user, name=collection_name)
         # check or update cache
@@ -66,6 +67,46 @@ class Collection(AppRequestHandler):
         render = self.render("collectionview.html",collection=coll)
         self.out(rendered=render)
 
+    def post(self):
+        logging.info("yeah!")
+        user = UserData.current()
+        name = self.request.get("name")
+        if name == "":
+            self.redirect("/collections/")
+
+        coll = SNPCollection.all().ancestor(user).fiter("name =", name).get()
+        if coll is None:
+            coll = SNPCollection(parent=user, name=name)
+            coll.put()
+
+        self.redirect("/collection/%s" % name)
+        return
+
+class DeleteCollection(AppRequestHandler):
+    def get(self, name):
+        user = UserData.current()
+        coll = SNPCollection.all().ancestor(user).filter("name =", name).get()
+        if coll is None:
+            logging.info("collection does not exist")
+            self.redirect("/collections/")
+            return
+        logging.info("deleting collection %s" % name)
+        coll.delete()
+        self.redirect("/collections/")
+        return
+        
+    def post(self, name):
+        user = UserData.current()
+        coll = SNPCollection.all().ancestor(user).filter("name=", name).get()
+        if coll is None:
+            logging.info("collection does not exist")
+            self.redirect("/collections/")
+            return
+        logging.info("deleting collection %s" % name)
+
+        coll.delete()
+        self.redirect("/collections/")
+        return
 
 class EditCollection(AppRequestHandler):
     _template = "baserender.html"
@@ -149,8 +190,9 @@ class EditCollection(AppRequestHandler):
 
 
 
-__routes__ = [('/collection/(.*)',Collection),
+__routes__ = [('/collection/',Collection),
               ('/collections/',CollectionList),
               ('/editcollection/(.*)', EditCollection),
-              ('/diseases/groupebysnps/(.*)',diseasesGroupedBySNPs)]
+              ('/diseases/groupebysnps/(.*)',diseasesGroupedBySNPs),
+              ('/deletecollection/(.*)', DeleteCollection)]
 # __routes__ = []

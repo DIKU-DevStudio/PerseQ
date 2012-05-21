@@ -1,42 +1,50 @@
-<h2>Diseases by SNPs</h2>
-</br>
-{% for snp in snps %}
-<article class="row">
-    <div class="span1">
-        <h4>rs{{snp.snpid}}</h4>
+<div class="row-fluid">
+    <div class="span9">
+        <h2> <a href="/collections/">Collections</a> > <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> > related diseases
+        <!-- <div class="row"> -->
+            {% for snp in snps %}    
+            <h4>rs{{snp.snpid}}</h4>
+            {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="">Disease</th>
+                    <th>Gene</th>
+                    <th class="">Intergenic</th>                
+                    <th class="">Odds Ratio</th>
+                    <th class="">p&#8209;Value</th>
+                    <th class="">Allele Freq.</th>
+                    <th class="">CI</th>
+                </tr>
+                </thead>
+                <tbody>
+            {% for gwas in snp.gwas %}
+                <tr>
+                    <td><a href="/disease/{{gwas.disease.name}}">{{gwas.disease.name}}</a>   <a class="btn-mini btn-info" href="/study/{{gwas.study.key().name()}}">&raquo;</a></td>
+                    <td><a class="btn-mini btn-info" href="/gene/{{gwas.gene.name}}">{{gwas.gene.name}} &raquo;</a></td>
+                    <td>{{gwas.intergenic}}</td>
+                    <td>{{gwas.OR_beta}}</td>
+                    <td>{{gwas.p_val}}</td>
+                    <td>{{gwas.riscAlleleFrequency}}</td>
+                    <td>{{gwas.CI}}</td>
+                </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}        
+            {% endfor %}
+        <!-- </div> -->
     </div>
-    <div class="span11">
-        {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
-        <table class="table">
-            <thead>
-            <tr>
-                <th class="span5">Disease</th>
-                <th class="span1">Study</th>
-                <th class="span1">Gene</th>
-                <th class="span1">Intergenic</th>
-                <th class="span1">Odds Ratio</th>
-                <th class="span1">p&#8209;Value</th>
-                <th class="span1">Allele Freq.</th>
-                <th class="span1">CI</th>
-            </tr>
-            </thead>
-            <tbody>
-        {% for gwas in snp.gwas %}
-            <tr>
-                <td><a href="/disease/{{gwas.disease.name}}">{{gwas.disease.name}}</a></td>
-                <td><a class="btn-mini btn-info" href="/study/{{gwas.study.key().name()}}">study &raquo;</a></td>
-                <td><a class="btn-mini btn-info" href="/gene/{{gwas.gene.name}}">{{gwas.gene.name}} &raquo;</a></td>
-                <td>{{gwas.intergenic}}</td>
-                <td>{{gwas.OR_beta}}</td>
-                <td>{{gwas.p_val}}</td>
-                <td>{{gwas.riscAlleleFrequency}}</td>
-                <td>{{gwas.CI}}</td>
-            </tr>
-        {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-    </div>
-</article>
 
-{% endfor %}
+    <div class="span3">
+        <div class="well sidebar-nav">
+        <ul class="nav nav-list">
+          <li class="nav-header">Navigate Collection</li>
+          <li> <a href="/collection/?name={{collection.name}}">SNPs</a> </li>
+          <li><a href="/diseases/groupebysnps/{{collection.name}}">Related Diseases</a></li>
+          <li><a href="/deletecollection/{{collection.name}}">Delete Collection</a></li>
+          <li><a href="/editcollection/{{collection.name}}">Add SNPs</a></li>
+        </ul>
+        </div><!--/.well -->
+    </div><!--/span-->
+</div>
