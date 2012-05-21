@@ -18,9 +18,11 @@ class diseasesGroupedBySNPs(AppRequestHandler):
         user = UserData.current()
         # coll = db.get(db.Key.from_path("SNPCollection", collection_id, parent=user.key()))
         coll = SNPCollection.all().ancestor(user).filter("name =", collection_id).get()
-        
+        if coll is None:
+            self.redirect("/collections/")
+            return
+
         snps = db.get(coll.snps)
-        logging.info(dir(snps[0]))
         render = self.render("snp_disease_collection.html", snps=snps)
         # memcache.set(collection_id, render, namespace="snp_disease_collection")
 
@@ -55,12 +57,13 @@ class Collection(AppRequestHandler):
         if coll is None:
             coll = SNPCollection(parent=user, name=collection_name)
             coll.put()
+            # had issues with the instance not being ready, forces it to do a query for it
+            coll = db.get(coll.key())
 
-        new_coll = db.get(coll.key())
         # coll = SNPCollection.get_or_insert(parent=user, name=collection_name)
         # check or update cache
         # render from template
-        render = self.render("collectionview.html",collection=new_coll)
+        render = self.render("collectionview.html",collection=coll)
         self.out(rendered=render)
 
 
@@ -70,7 +73,6 @@ class EditCollection(AppRequestHandler):
         # user = users.get_current_user()
         user = UserData.current()
         coll = SNPCollection.all().ancestor(user).filter("name =", collection_name).get()
-        logging.info(coll)
         if coll is None:
             logging.info("redirecting")
             # if collection doesn't exist - redirect to list of collections

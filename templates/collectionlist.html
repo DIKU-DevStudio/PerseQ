@@ -1,18 +1,22 @@
-<h2>SNP Collection</h2>
-{% for coll in collections %}
-<article class="row">
-    <div class="span">
-    <h3>
-        <a href="/collection/{{coll.name}}">{{coll.name}}</a>
-    </h3>
-    </div>
-</article>
+<h2>SNP Collections</h2>
+{% if collections %}
+<table class="table">
+    <thead><tr>
+            <th class="span7"><h4>Name</h4></th>
+            <th class="span1"><h4>Count</h4></th>
+            <th class="span1"><h4>Delete</h4></th>
+        </tr>
+    </thead>
+    <tbody>
+	{% for coll in collections %}					
+		<tr>
+			<td><h4><a href="/collection/{{coll.name}}">{{coll.name}}</h4></td>
+			<td>{{coll.count}}</td>
+			<td><a href="/deletecollection/{{coll.name}}">Delete</a></td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
 {% else %}
-<article class="row">
-<div class="span10">
-    <h3>
-        <h3>No collections</h3>
-    </h3>
-</div>
-</article>
-{% endfor %}
+<h4>No collections</h4>
+{% endif %}

@@ -1,21 +1,36 @@
-<h2>SNP Collection: {{collection.name}} ({{collection.count}})</h2>
-<a class="btn" href="/editcollection/{{collection.name}}">add snps</a>
-<a class="btn" href="/diseases/groupebysnps/{{collection.name}}">related diseases</a>
+<div class="row-fluid">
+    <div class="span9">
+    	<h2>Collection: {{collection.name}}</h2>
+    	{% if collection.snps %}
+    	<table class="table">
+            <thead><tr>
+                    <th class="span8"><h4>SNP</h4></th>
+                    <th class="span1"><h4>Delete</h4></th>
+                </tr>
+            </thead>
+            <tbody>
+			{% for snp in collection.snps %}					
+				<tr>
+					<td><h4>{{snp.name()}}</h4></td>
+					<!-- TODO: delete snp -->
+					<td><a href="/collection/deletesnp/{{collection_name}}?snp={{snp.name()}}">Delete</a></td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<h4>No SNPs in collection - <a href="/editcollection/{{collection.name}}">Add SNPs</a>?</h4>
+		{% endif %}
+    </div><!--/span-->
+    <div class="span3">
+      <div class="well sidebar-nav">
+        <ul class="nav nav-list">
+          <li class="nav-header">Coll: {{collection.name}} ({{collection.count}})</li>
+          <li><a href="/diseases/groupebysnps/{{collection.name}}">Related Diseases</a></li>
+          <li><a href="/deletecollection/{{collection.name}}">Delete Collection</a></li>
+          <li><a href="/editcollection/{{collection.name}}">Add SNPs</a></li>
+        </ul>
+      </div><!--/.well -->
+    </div><!--/span-->
+</div><!--/row-->
 
-{% for snp in collection.snps %}
-<article class="row">
-    <div class="span10">
-    <h3>
-        {{snp.name()}}
-    </h3>
-    </div>
-</article>
-{% else %}
-<article class="row">
-<div class="span10">
-    <h3>
-        <h3>No SNPs</h3>
-    </h3>
-</div>
-</article>
-{% endfor %}
