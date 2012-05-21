@@ -108,6 +108,25 @@ class studyView(AppRequestHandler):
 
         self.out(study=study)
 
+class SNPView(AppRequestHandler):
+    _template = "baserender.html"
+    def get(self, snpid):
+        if snpid == "":
+            self.error(404)
+            return
+
+        render = memcache.get(snpid, namespace="snp")
+        if render is None:
+            key = db.Key.from_path("Snp", snpid)
+            snp = db.get(key)
+            if snp is None:
+                self.error(404)
+                return
+            render = self.render("snpview.html", snp=snp)
+            memcache.set(snpid, render, namespace="snp")
+
+        self.out(rendered=render)
+
 class genePresenter(AppRequestHandler):
     """View a particular gene"""
     _template = 'gene.html'
@@ -156,4 +175,5 @@ __routes__ = [('/studies/', studyList),
               ('/comment/(.*)/edit', commentEditor),
               ('/diseases/', diseaseList),
               ('/disease/(.*)', diseaseView),
-              ('/gene/(.*)',  genePresenter)]
+              ('/gene/(.*)',  genePresenter),
+              ('/snp/(.*)', SNPView)]
