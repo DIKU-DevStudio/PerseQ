@@ -3,29 +3,32 @@
   <input id="name" name="name" type="text" class="input-small span10" placeholder="new collection..">
   <button type="submit" class="btn">Create</button>
 </form>
-{% if collections %}
-<table class="table">
-    <thead><tr>
-            <th class="span7"><h4>Name</h4></th>
-            <th class="span1"><h4>Count</h4></th>
-            <th class="span1"><h4>Delete</h4></th>
-        </tr>
+{% for coll in collections %}
+	{% if loop.first %}
+	<table class="table">
+    <thead>
+    <tr>
+	    <th class="span7"><h4>Name</h4></th>
+	    <th class="span1"><h4>Count</h4></th>
+	    <th class="span1"><h4>Delete</h4></th>
+    </tr>
     </thead>
     <tbody>
-	{% for coll in collections %}					
-		<tr>
-			<td><h4><a href="/collection/?name={{coll.name}}">{{coll.name}}</h4></td>
-			<td>{{coll.count}}</td>
-			<td>
-				<form type="post" action="/deletecollection/{{coll.name}}">
-  					<button type="submit" class="btn-mini">Delete</button>
-				</form>
-				<!-- <a class="btn" href=>Delete</a> -->
-			</td>
-		</tr>
-	{% endfor %}
+    {% endif %}
+    <tr>
+		<td><h4><a href="/collection/?name={{coll.name}}">{{coll.name}}</h4></td>
+		<td>{{coll.count}}</td>
+		<td>
+			<form type="post" action="/deletecollection/{{coll.name}}">
+					<button type="submit" class="btn-mini">Delete</button>
+			</form>
+			<!-- <a class="btn" href=>Delete</a> -->
+		</td>
+	</tr>
+	{% if loop.last %}
 	</tbody>
-</table>
-{% else %}
-<h4>No collections</h4>
-{% endif %}
+	</table>
+	{% endif %}
+	{% else %}
+	 <h4>No Collections</h4>
+{% endfor %}
