@@ -108,14 +108,14 @@ class DeleteCollection(AppRequestHandler):
         self.redirect("/collections/")
         return
 
-class EditCollection(AppRequestHandler):
+class AddSNPs(AppRequestHandler):
     _template = "baserender.html"
     def get(self, collection_name):
         # user = users.get_current_user()
         user = UserData.current()
         coll = SNPCollection.all().ancestor(user).filter("name =", collection_name).get()
         if coll is None:
-            logging.info("redirecting")
+            # logging.info("redirecting")
             # if collection doesn't exist - redirect to list of collections
             self.redirect("/collections/")
             return
@@ -130,7 +130,7 @@ class EditCollection(AppRequestHandler):
         logging.info("adding snps to coll: %s" % collection_name)
         snps = self.request.get("snps")
         # for testing
-        snps = '10260404,3825776,12284594,rs1805007,12345'
+        # snps = '10260404,3825776,12284594,rs1805007,12345'
         # comma seperated list of snps
         snpids = snps.split(',')
         # verify input:
@@ -192,7 +192,7 @@ class EditCollection(AppRequestHandler):
 
 __routes__ = [('/collection/',Collection),
               ('/collections/',CollectionList),
-              ('/editcollection/(.*)', EditCollection),
+              ('/addsnps/(.*)', AddSNPs),
               ('/diseases/groupebysnps/(.*)',diseasesGroupedBySNPs),
               ('/deletecollection/(.*)', DeleteCollection)]
 # __routes__ = []

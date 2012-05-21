@@ -1,6 +1,10 @@
 <div class="row-fluid">
     <div class="span9">
     	<h2> <a href="/collections/">Collections</a> > <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> > SNPs</h2>
+      <form class="well form-inline" type="post" action="/addsnps/{{collection.name}}">
+  <input id="snps" name="snps" type="text" class="input-small span8" placeholder="write comma-seperated snpids: 10260404,3825776,12284594,7041847,16955379,rs1805007,12345">
+  <button type="submit" class="btn">Add</button>
+</form>
     	{% if collection.snps %}
     	<table class="table">
             <thead>
@@ -30,7 +34,6 @@
           <li class="active"> <a href="/collection/?name={{collection.name}}">SNPs</a> </li>
           <li><a href="/diseases/groupebysnps/{{collection.name}}">Related Diseases</a></li>
           <li><a href="/deletecollection/{{collection.name}}">Delete Collection</a></li>
-          <li><a href="/editcollection/{{collection.name}}">Add SNPs</a></li>
         </ul>
         </div><!--/.well -->
     </div><!--/span-->
