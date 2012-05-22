@@ -38,7 +38,7 @@ def AddSNPDocument(snp):
         fields=[
             search.TextField(name='snpid', value=snp.snpid),
             ])
-    search.Index(name=study._index).add(doc)
+    search.Index(name=snp._index).add(doc)
 
 def AddGeneDocument(gene):
     doc = search.Document(doc_id=gene.geneid,

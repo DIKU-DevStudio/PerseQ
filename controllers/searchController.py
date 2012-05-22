@@ -9,13 +9,16 @@ class SearchHandler(AppRequestHandler):
         """ Request via GET = single """
         result = None
         if query != "":
-            result = self._model.search(query)
-        self.response.out.write(result)
-        #self.toJson(result)
-
-    #def post(self, query):
-    #    """Request via POST = Batch"""
-    #    pass
+            result = self._model.search('"'+query+'"')
+            out = []
+            for scoreddocument in result:
+                d = {}
+                for f in scoreddocument.fields:
+                    d[f.name] = f.value
+                out.append(d)
+            self.toJson(out)
+        else:
+            self.error(404)
 
 
 class SNPSearch(SearchHandler):
