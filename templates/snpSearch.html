@@ -5,51 +5,56 @@ Search for a SNP
 
 {% block head %}
 <script type="text/javascript">
-    function isNumber(n) {
-          return !isNaN(parseFloat(n)) && isFinite(n);
-    }
-    function omnify() {
-        var search = $('#search').val();
-        if(search.slice(0,2).toLowerCase() == 'rs' || isNumber(search))  {
-            loadResults();
-        } else {
-            alert('OmniSearch doesn\'t know what to do with your query');
-        }
-    }
-    
-
     function loadSnp(html, ret) {
-        items = ret['result'];
-        for(it in items) {
-            console.log(it);
-            item = $("<h1>"+items[it]['snpid']+'</h1>')
-            item.append('<small> belongs to '+items[it]['gene']['name']+'</small>');
+        for(it in ret) {
+            item = $('<h3><a href="#">'+items[it]['snpid']+'</a></h3>')
+            item.append('<small> belongs to '+items[it]['name']+'</small>');
             html.append(item);
         }
         return html;
     }
     function loadGene(html, ret) {
+        for(it in ret) {
+            item = $('<h3><a href="/gene/'+ret[it]['name']+'">'+ret[it]['name']+'</a><small> also known as '+ret[it]['alias']+'</small></h3>')
+            item.append('<small> belongs to '+ret[it]['name']+'</small>');
+            html.append(item);
+        }
         return html;
     }
     function loadDisease(html, ret) {
+        for(it in ret) {
+            item = $("<h3>"+ret[it]['snpid']+'</h3>')
+            item.append('<small> belongs to '+ret[it]['name']+'</small>');
+            html.append(item);
+        }
         return html;
     }
     function loadStudy(html, ret) {
+        for(it in ret) {
+            item = $('<h3><a href="/study/'+ret[it]['id']+'">'+ret[it]['name']+'</a></h3>')
+            item.append('<p>'+ret[it]['abstract']+'</p>');
+            html.append(item);
+        }
         return html;
     }
     function loadResult(url, htmlCallback, btnid) {
         $.get(url, function(ret) {
-                ret = JSON.parse(ret);
+            ret = JSON.parse(ret);
 
-                // Build result html
-                html = $('<div class="'+btnid+'"></div>').hide();
-                $("#searchResults").append(htmlCallback(html, ret));
+            // Build result html
+            html = $('<div class="'+btnid+'"></div>').hide();
+            $("#searchResults").append(htmlCallback(html, ret));
 
-                //Display it
-                $("#"+btnid+'_count').text(ret['count']).parent().click(function() {
+            //Display it
+            obj = $("#"+btnid+'_count').text(ret.length).parent();
+            if(ret.length > 0) {
+                obj.removeAttr("disabled").click(function() {
                         $("."+btnid).toggle();
                     }).click();
-                });
+            } else {
+                obj.attr("disabled", "disabled");
+            }
+        });
     }
 
     function loadResults() {
@@ -77,7 +82,7 @@ Search for a SNP
 {% endblock %}
 
 {% block content %}
-<form class="well form-vertical" action="" onsubmit="loadResults(); return false;">
+<form class="well form-vertical" action="javascript:loadResults();" onsubmit="loadResults(); return false;">
     <div class="row-fluid">
         <div class="span7">
             <p>Search for diseases, SNPs, genes or tags.</p>
@@ -96,7 +101,7 @@ Search for a SNP
 
 <div class="row span12">
     <h3><small>Results</small></h3>
-    <div id="loading"><p>Load</p></div>
+    <div id="loading">No search results.</div>
 
     <div class="btn-group" data-toggle="buttons-checkbox">
         <div class="btn"><span id="snp_count">0</span> SNPs</div>

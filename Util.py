@@ -29,7 +29,8 @@ def AddStudyDocument(study):
         fields=[
             search.TextField(name='name', value=study.name),
             search.TextField(name='disease_trait', value=study.disease_trait),
-            search.TextField(name='abstract', value=study.abstract)
+            search.TextField(name='abstract', value=study.abstract),
+            search.TextField(name='id', value=study.pubmed_id)
             ])
     search.Index(name=study._index).add(doc)
 
@@ -43,6 +44,7 @@ def AddSNPDocument(snp):
 def AddGeneDocument(gene):
     doc = search.Document(doc_id=gene.geneid,
         fields=[
+            search.TextField(name='id', value=gene.geneid),
             search.TextField(name='name', value=gene.name),
             search.TextField(name='alias', value=str(gene.alias)),
             ])
@@ -260,7 +262,19 @@ def purge():
         except Exception, e:
             print e
             pass
-    print "done"
+    print "Datastore cleared"
+
+    for model in [Snp, Gene,GWAS, Study, Disease]:
+        index = search.Index(name=model._index)
+        while True:
+            # Get a list of documents populating only the doc_id field and extract the ids.
+            document_ids = [document.doc_id
+                            for document in index.list_documents(ids_only=True)]
+            if not document_ids:
+                break
+            # Remove the documents for the given ids from the Index.
+            index.remove(document_ids)
+    print "Fulltext docs cleared"
 
 def snp_omim(snpids=None):
     """given list of snpids - returns the list of related OMIM IDs"""
