@@ -31,6 +31,8 @@
                             <li><a href="/search/">Search</a></li>
                             <li><a href="/diseases/">Diseases</a></li>
                             <li><a href="/studies/">Studies</a></li>
+                            <li><a href="/collections/">Collections</a></li>
+
                         </ul>
                         <ul class="nav pull-right">
                             <li><p class="navbar-text">{{user.nickname()}}</p></li>
@@ -42,8 +44,18 @@
         </div>
 
         <div id="content" class="container">
+            <!-- show errors -->
             {% if error %}
-                <span class="label label-important">{{error}}</span>
+            {% for err in error %}
+                <span class="label label-important">{{err}}</span>
+            {% endfor %}
+            {% endif %}
+            </br>
+            <!-- show warning -->
+            {% if warning %}
+            {% for war in warning %}
+                <span class="label label-warning">{{war}}</span>
+            {% endfor %}
             {% endif %}
 
             {% block content %}

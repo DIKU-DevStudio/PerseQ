@@ -13,44 +13,6 @@ from models.users import UserData
 
 from Bio import Entrez
 import StringIO
-
-"""
-imports the GWAS catalog file - and creates the 
-
-Date Added to Catalog
-PUBMEDID
-First Author
-Date
-Journal
-Link
-Study
-Disease_Trait
-Initial Sample Size
-Replication Sample Size
-Region
-Chr_id
-Chr_pos
-Reported Gene(s)
-Mapped_gene
-Upstream_gene_id
-Downstream_gene_id
-Snp_gene_ids
-Upstream_gene_distance
-Downstream_gene_distance
-Strongest SNP-Risk Allele
-SNPs
-Merged
-Snp_id_current
-Context
-Intergenic
-Risk Allele Frequency
-p-Value
-Pvalue_mlog
-p-Value (text)
-OR or beta
-95\% CI (text)
-Platform [SNPs passing QC]
-CNV"""
 from models.study import Study, GWAS, Gene, Snp, Disease
 
 import csv
@@ -62,10 +24,48 @@ def reset():
     memcache.flush_all()
 
 
-def populate(path="gwascatalog.txt", limit=200):
-    """Populate the database with data from gwascatalog.txt"""
+def populate(path="gwascatalog.txt", limit=100):
+    """Populate the database with data from gwascatalog.txt - one hell of an import!
+    - create models of SNP, Gene, Study and Disease and relations between the objects
+    - based on the following field-names in the TSV (excel):
+    Date Added to Catalog
+    PUBMEDID
+    First Author
+    Date
+    Journal
+    Link
+    Study
+    Disease_Trait
+    Initial Sample Size
+    Replication Sample Size
+    Region
+    Chr_id
+    Chr_pos
+    Reported Gene(s)
+    Mapped_gene
+    Upstream_gene_id
+    Downstream_gene_id
+    Snp_gene_ids
+    Upstream_gene_distance
+    Downstream_gene_distance
+    Strongest SNP-Risk Allele
+    SNPs
+    Merged
+    Snp_id_current
+    Context
+    Intergenic
+    Risk Allele Frequency
+    p-Value
+    Pvalue_mlog
+    p-Value (text)
+    OR or beta
+    95\% CI (text)
+    Platform [SNPs passing QC]
+    CNV"""
     docs = csv.DictReader(open(path,'rb'), dialect='excel-tab')
     pubids = {}
+    # read all GWAS into a dictionary, using pubmed_id as key
+    # - collecting all GWAS assorted with the same study under same key
     for doc in docs:
         pubid = doc["PUBMEDID"]
         if pubids.has_key(pubid):
@@ -79,34 +79,39 @@ def populate(path="gwascatalog.txt", limit=200):
         if i == limit:
             break
         rel = line[0]
-        # print pid
+        
+        # create or get disease with disease_name as key
         disease_name = rel["Disease/Trait"].strip().lower()
         disease = Disease.get_or_insert(disease_name,
             name=disease_name)
 
+        # create or get study with study_id
         study = Study.get_or_insert(pid,
-            name=rel["Study"],
+            name=rel["Study"].strip(),
             disease_trait = disease_name,
             disease_ref = disease,
             pubmed_id = pid)
-        # print rel["Date"].strip()
+        
+        # parse date of study
         date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
-        # print date
+        # populate model
         study.date = date
         study.pubmed_url=rel["Link"].strip()
         study.init_sample = rel["Initial Sample Size"].strip()
         study.repl_sample= rel["Replication Sample Size"].strip()
         study.platform = rel["Platform [SNPs passing QC]"].strip()
         study.put()
-            
+        
         for rel in line:
-            # init gene relation
+            # A gwas has either a direct gene or a 
+            # down-stream and up-stream gene
             gene = None
             up_gene = None
             down_gene = None
 
-            # if intergenic gwas, we go nuts..
-            intergenic = rel["Intergenic"] == "2"
+            # The retards at GWAS use 1 == intergenic, 2 == not intergenic
+            # ... no seriously, _retards_
+            intergenic = rel["Intergenic"].strip() == "2"
 
             if not intergenic:
                 geneid = rel["Snp_gene_ids"].strip()
@@ -173,13 +178,19 @@ def populate(path="gwascatalog.txt", limit=200):
                 except:
                     # haplotype?
                     snpid = "N/A"
-            
+            else:
+                "N/A"
             # if no gene or snp relation is mentioned - ignore and just insert study
             if (gene is None or up_gene is None) and snp is None:
                 print "skipping gwas"
                 continue
             # init gwas
-            gwas = GWAS(study=study, intergenic=intergenic, disease=disease)
+            gwas = GWAS(study=study,
+                intergenic=intergenic,
+                disease=disease,
+                snp=snp)
+
+            # if SNP is intergenic, save up/down-stream, else gene
             if intergenic:
                 if down_gene is not None and up_gene is not None:
                     gwas.downstream = down_gene
@@ -197,9 +208,8 @@ def populate(path="gwascatalog.txt", limit=200):
             try:
                 # test that p-Value is actually a float before parsing out
                 float(rel["p-Value"])
-                gwas.p_val = int(rel["p-Value"].split("E")[1])    
+                gwas.p_val = int(rel["p-Value"].split("E-")[1])  
             except Exception, e:
-                # print e
                 # forces the filter to downgrade this gwas wrt. p-value
                 gwas.p_val = 0
             # could be interesting
@@ -211,7 +221,7 @@ def populate(path="gwascatalog.txt", limit=200):
                 rel["Risk Allele Frequency"].strip()
             gwas.put()
 
-    memcache.delete('gwas_main')
+    memcache.flush_all()
     print "done"
 
 def purge():
@@ -256,7 +266,6 @@ def omim_efetch(db=None, ids=None):
     pubs = Entrez.read(handle)
     handle.close()
     print pubs
-
 
 class jTemplate():
     """Template helper, sets the template base path and uses a given renderer on
@@ -317,6 +326,6 @@ class AppRequestHandler(webapp2.RequestHandler):
         Prettify flag tells whether to use the google code prettify markup"""
         data = {'xml':xml}
         if prettify:
-            jTemplate.render("data/prettify/xml.html", data, self.response.out.write);
+            jTemplate.render("data/prettify/xml.html", data, self.response.out.write)
         else:
-            jTemplate.render("data/xml.html", data,self.response.out.write );
+            jTemplate.render("data/xml.html", data,self.response.out.write )

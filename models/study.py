@@ -49,7 +49,7 @@ class Snp(db.Model):
     # kan ligge uden for et gen, derfor ikke required
     gene = db.ReferenceProperty(Gene,
             collection_name='snps')
-    snpid = db.StringProperty() # rs1805007
+    snpid = db.StringProperty(indexed=True) # rs1805007
 
 # ID = random
 # ancestor=study_id == pubmed_id
@@ -71,7 +71,7 @@ class GWAS(db.Model):
     downstream = db.ReferenceProperty(Gene, collection_name="downstream")
 
     # snp ids..
-    snps = db.StringProperty()
+    snp = db.ReferenceProperty(Snp, collection_name="gwas")
     # 27 - # 6 * 10^-8
     p_string = db.StringProperty()
     # 6 * 10^-8 => p_val = -8
