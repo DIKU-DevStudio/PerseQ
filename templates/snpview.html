@@ -1,6 +1,10 @@
 {% block content %}
 <h2>SNP: {{snp.snpid}}</h2>
+{% if snp.gene %}
 <h3>Parent gene: {{snp.gene.key().name()}}</h3>
+{% else %}
+    Parent gene: None
+{% endif %}
 {% endblock %}
 {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
 <table class="table">
