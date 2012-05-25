@@ -17,7 +17,7 @@
             <tbody>
 			{% for snp in collection.snps %}					
 				<tr>
-					<td>{{snp.name()}}</td>
+					<td> <a href="/snp/{{snp.name()}}">{{snp.name()}}</a></td>
 					<!-- TODO: delete snp -->
 					<td><a href="/deletesnp/{{collection.name}}/?snp={{snp.name()}}">Delete</a></td>
 				</tr>
