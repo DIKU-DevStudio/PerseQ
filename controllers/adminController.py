@@ -2,7 +2,7 @@
 # Controller for administrator presentation
 #
 ###
-from util import AppRequestHandler
+from Util import AppRequestHandler
 
 class adminDashboard(AppRequestHandler):
     def get(self):

@@ -4,16 +4,17 @@
 import webapp2
 from jinja2 import Environment, FileSystemLoader
 import os
-import json
+import simplejson
 import logging
 from google.appengine.ext import db
-from google.appengine.api import memcache, users
+from google.appengine.api import memcache, users, search
 from datetime import datetime
 from models.users import UserData
+from models.study import Study, GWAS, Gene, Snp, Disease
 
 from Bio import Entrez
 import StringIO
-from models.study import Study, GWAS, Gene, Snp, Disease
+
 
 import csv
 from google.appengine.api import memcache
@@ -23,6 +24,38 @@ def reset():
     """
     memcache.flush_all()
 
+def AddDiseaseDocument(d):
+    doc = search.Document(doc_id="".join(d.name.split()), # doesnt allow spaces
+        fields=[
+            search.TextField(name='name', value=d.name),
+            ])
+    search.Index(name=d._index).add(doc)
+
+
+def AddStudyDocument(study):
+    doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
+        fields=[
+            search.TextField(name='name', value=study.name),
+            search.TextField(name='disease_trait', value=study.disease_trait),
+            search.TextField(name='id', value=study.pubmed_id)
+            ])
+    search.Index(name=study._index).add(doc)
+
+def AddSNPDocument(snp):
+    doc = search.Document(
+        fields=[
+            search.TextField(name='snpid', value=snp.snpid),
+            ])
+    search.Index(name=snp._index).add(doc)
+
+def AddGeneDocument(gene):
+    doc = search.Document(doc_id=gene.geneid,
+        fields=[
+            search.TextField(name='id', value=gene.geneid),
+            search.TextField(name='name', value=gene.name),
+            search.TextField(name='alias', value=str(gene.alias)),
+            ])
+    search.Index(name=gene._index).add(doc)
 
 def populate(path="gwascatalog.txt", limit=100):
     """Populate the database with data from gwascatalog.txt - one hell of an import!
@@ -84,6 +117,7 @@ def populate(path="gwascatalog.txt", limit=100):
         disease_name = rel["Disease/Trait"].strip().lower()
         disease = Disease.get_or_insert(disease_name,
             name=disease_name)
+        AddDiseaseDocument(disease)
 
         # create or get study with study_id
         study = Study.get_or_insert(pid,
@@ -101,7 +135,8 @@ def populate(path="gwascatalog.txt", limit=100):
         study.repl_sample= rel["Replication Sample Size"].strip()
         study.platform = rel["Platform [SNPs passing QC]"].strip()
         study.put()
-        
+        AddStudyDocument(study)
+
         for rel in line:
             # A gwas has either a direct gene or a 
             # down-stream and up-stream gene
@@ -127,17 +162,18 @@ def populate(path="gwascatalog.txt", limit=100):
                         if not disease.key() in gene.diseases:
                             gene.diseases.append(disease.key())
                         gene.put()
+                        AddGeneDocument(gene)
             else:
                 # up and downstream genes must be set
                 down_id = rel["Downstream_gene_id"].strip()
-                up_id = rel["Upstream_gene_id"].strip() 
+                up_id = rel["Upstream_gene_id"].strip()
 
                 if up_id != "" and down_id != "":
                     up_down_names = rel["Mapped_gene"].split(" - ")
                     if len(up_down_names) < 2:
                         # gene = NR / NS or whatever..
                         up_down_names = ["N/A", "N/A"]
-                    
+
                     # create upstream gene
                     up_name = up_down_names[0]
                     down_name = up_down_names[1]
@@ -175,11 +211,10 @@ def populate(path="gwascatalog.txt", limit=100):
                     if not disease.key() in snp.diseases:
                         snp.diseases.append(disease.key())
                     snp.put()
+                    AddSnpDocument(snp)
                 except:
                     # haplotype?
                     snpid = "N/A"
-            else:
-                "N/A"
             # if no gene or snp relation is mentioned - ignore and just insert study
             if (gene is None or up_gene is None) and snp is None:
                 print "skipping gwas"
@@ -203,7 +238,7 @@ def populate(path="gwascatalog.txt", limit=100):
             gwas.p_string = rel["p-Value"].strip()
             # could be none
             gwas.snps = snpid
-            
+
             # parse out the exponent: 6E-8 => -8
             try:
                 # test that p-Value is actually a float before parsing out
@@ -232,11 +267,22 @@ def purge():
                 q = db.GqlQuery("SELECT __key__ FROM %s" % model)
                 assert q.count()
                 db.delete(q.fetch(200))
-                # time.sleep(0.5)
         except Exception, e:
             print e
             pass
-    print "done"
+    print "Datastore cleared"
+
+    for model in [Snp, Gene,GWAS, Study, Disease]:
+        index = search.Index(name=model._index)
+        while True:
+            # Get a list of documents populating only the doc_id field and extract the ids.
+            document_ids = [document.doc_id
+                            for document in index.list_documents(ids_only=True)]
+            if not document_ids:
+                break
+            # Remove the documents for the given ids from the Index.
+            index.remove(document_ids)
+    print "Fulltext docs cleared"
 
 def snp_omim(snpids=None):
     """given list of snpids - returns the list of related OMIM IDs"""
@@ -279,10 +325,8 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
-# import StringIO
 env = Environment(loader=FileSystemLoader(os.path.join(
-        os.path.dirname(__file__), 'templates')))
-
+            os.path.dirname(__file__), 'templates')))
 class AppRequestHandler(webapp2.RequestHandler):
     """Base class for controllers"""
     _template = None
@@ -315,7 +359,8 @@ class AppRequestHandler(webapp2.RequestHandler):
     def toJson(self, dictionary, prettify = False):
         """Display JSON data template.
         Prettify flag tells whether to use the google code prettify markup"""
-        data = {"json": json.dumps(dictionary)}
+        enc = simplejson.JSONEncoder()
+        data = {"json": enc.encode(dictionary)}
         if prettify:
             jTemplate.render("data/prettify/json.html", data , self.response.out.write);
         else:
@@ -328,4 +373,5 @@ class AppRequestHandler(webapp2.RequestHandler):
         if prettify:
             jTemplate.render("data/prettify/xml.html", data, self.response.out.write)
         else:
-            jTemplate.render("data/xml.html", data,self.response.out.write )
+            jTemplate.render("data/xml.html", data,self.response.out.write );
+

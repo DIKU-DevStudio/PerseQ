@@ -2,7 +2,7 @@
 Controller containing logic for requests to different SNP databases
 """
 
-from util import AppRequestHandler
+from Util import AppRequestHandler
 from Bio import Entrez
 from xml.dom.minidom import parseString
 

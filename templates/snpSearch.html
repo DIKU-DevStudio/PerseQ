@@ -5,55 +5,123 @@ Search for a SNP
 
 {% block head %}
 <script type="text/javascript">
-    function isNumber(n) {
-          return !isNaN(parseFloat(n)) && isFinite(n);
+    function ucwords(str,force){
+    str=force ? str.toLowerCase() : str;  
+    return str.replace(/(\b)([a-zA-Z])/g,
+            function(firstLetter){
+                return   firstLetter.toUpperCase();
+            });
     }
-    function omnify() {
-        var search = $('#search').val();
-        if(search.slice(0,2).toLowerCase() == 'rs' || isNumber(search))  {
-            loadSnp();
-        } else {
-            alert('OmniSearch doesn\'t know what to do with your query');
+    function loadSnp(html, ret) {
+        for(it in ret) {
+            item = $('<h3><a href="/snp/'+ret[it]['snpid']+'">rs'+ret[it]['snpid']+'</a></h3>')
+            html.append(item);
         }
+        return html;
     }
-    function loadSnp() {
-        var snp = $('#search').val();
-        var loading = 'Loading ...';
-        $('#dbsnp').html(loading).load('/dbsnp/?snp='+snp, function() {
-            prettyPrint();
+    function loadGene(html, ret) {
+        for(it in ret) {
+            item = $('<h3><a href="/gene/'+ret[it]['name']+'">'+ret[it]['name']+'</a><small> also known as '+ret[it]['alias']+'</small></h3>')
+            html.append(item);
+        }
+        return html;
+    }
+    function loadDisease(html, ret) {
+        for(it in ret) {
+            item = $('<h4>'+ucwords(ret[it]['name'])+'</h4>');
+            html.append(item);
+        }
+        return html;
+    }
+    function loadStudy(html, ret) {
+        for(it in ret) {
+            item = $('<h3><a href="/study/'+ret[it]['id']+'">'+ret[it]['name']+'</a></h3>')
+            html.append(item);
+        }
+        return html;
+    }
+    function loadResult(url, htmlCallback, btnid) {
+        $.get(url, function(ret) {
+            ret = JSON.parse(ret);
+
+            // Build result html
+            $('.'+btnid).remove();
+            html = $('<div class="'+btnid+' row"></div>');
+            html.append($('<div class="span2">'+ucwords(btnid)+'</div>'));
+            html.append(htmlCallback($('<div class="span10">'), ret));
+            
+            //Display it
+            obj = $("#"+btnid+'_count').text(ret.length).parent();
+            if(ret.length > 0) {
+                $("#searchResults").append(html);
+                obj.removeAttr("disabled").addClass('active');
+            } else {
+                obj.attr("disabled", "disabled").removeClass('active');
+            }
         });
-        $('#pubmed').html(loading).load('/pubmed/?snp='+snp);
-        $('#tags').html(loading).load('/tag/?snp='+snp);
     }
-    {% if search %}
+
+    function loadResults() {
+        var val = $('#search').val();
+        if(val.substr(0,2).toLowerCase() == 'rs') {
+            val = val.substr(2);
+        }
+
+        loadResult('/search/snp/'+val, loadSnp, 'SNPs');
+        loadResult('/search/gene/'+val, loadGene, 'genes');
+        loadResult('/search/disease/'+val, loadDisease, 'diseases');
+        loadResult('/search/study/'+val, loadStudy, 'studies');
+    }
     $(document).ready(function() {
-       omnify();     
+        {% if search %}
+        loadResults();
+        {% endif %}
+
+        $('#loading').text("No results loaded")
+            .ajaxStart(function() {
+                $(this).show().text("Loading results...");
+            })
+            .ajaxStop(function() {
+                $(this).text("Search complete.");
+            })
+        ;   
+        $('.btn.tgl').click(function() {
+                $("."+$(this).attr('data-cls')).toggle();
+            });
     });
-    {% endif %}
 </script>
 {% endblock %}
+
 {% block content %}
-<form class="well" action="" onsubmit="omnify(); return false;">
-    <p>Search for diseases, SNPs, genes or tags.
-    <small>For instance try &quot;Rs1815739&quot;</small></p>
-    <input type="text" class="search-query span4" placeholder="OmniSearch" id="search" value="{{search if search}}" />
-        <!--<a href="#" onclick="javascript:loadSnp()" class="btn">Load</a>-->
-</form>
-    <div class="tabbable">
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#pubmed" data-toggle="tab">Pubmed</a></li>
-            <li><a href="#dbsnp" data-toggle="tab">dbSnp</a></li>
-            <li><a href="#tags" data-toggle="tab">Tags</a></li>
-        </ul>
-        <div class="tab-content">
-            <div class="tab-pane active" id="pubmed">
-                <h1>No Pubmed articles found.</h1>
-            </div>
-            <div class="tab-pane" id="dbsnp">
-                <h1>No dbSNP results retrieved.</h1>
-            </div>
-            <div class="tab-pane" id="tags">
-            </div>
+<form class="well form-vertical" action="javascript:loadResults();" onsubmit="loadResults(); return false;">
+    <div class="row-fluid">
+        <div class="span7">
+            <p>Search for diseases, SNPs, genes or tags.</p>
+            <p><small>For instance try &quot;Rs9315385&quot;</small></p>
+            <input type="text" class="search-query span4" placeholder="OmniSearch" id="search" value="{{search if search}}" />
+            <input type="submit" value="Search" class="btn btn-primary" />
+        </div>
+        <div id="batchsearch" class="span5">
+            <p>Or look up a batch of SNPs or genes here</p>
+            <p><small>Paste comma-separated, or with one value per line</small></p>
+            <textarea name="batch" class="span4"></textarea>
+            <input type="submit" value="Search" class="btn btn-primary" />
         </div>
     </div>
+</form>
+
+<div class="row span12">
+    <h3><small>Results</small></h3>
+    <div id="loading">No search results.</div>
+
+    <div class="btn-group" data-toggle="buttons-checkbox">
+        <div class="btn tgl" data-cls="SNPs"><span id="SNPs_count">0</span> SNPs</div>
+        <div class="btn tgl" data-cls="genes"><span id="genes_count">0</span> Genes</div>
+        <div class="btn tgl" data-cls="diseases"><span id="diseases_count">0</span> Diseasess</div>
+        <div class="btn tgl" data-cls="studies"><span id="studies_count">0</span> Studies</div>
+    </div>
+</div>
+<div class="span12" id="searchResults">
+</div>
+
 {% endblock %}
