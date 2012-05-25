@@ -1,4 +1,4 @@
-from util import AppRequestHandler
+from Util import AppRequestHandler
 import logging
 from google.appengine.api import memcache
 from google.appengine.ext import db
