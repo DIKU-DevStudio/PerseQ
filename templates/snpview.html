@@ -1,0 +1,31 @@
+{% block content %}
+<h2>SNP: {{snp.snpid}}</h2>
+{% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
+<table class="table">
+    <thead>
+    <tr>
+        <th class="">Disease</th>
+        <th>Gene</th>
+        <th class="">Intergenic</th>                
+        <th class="">Odds Ratio</th>
+        <th class="">p&#8209;Value</th>
+        <th class="">Allele Freq.</th>
+        <th class="">CI</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for gwas in snp.gwas %}
+    <tr>
+        <td><a href="/disease/{{gwas.disease.name}}">{{gwas.disease.name}}</a>   <a class="btn-mini btn-info" href="/study/{{gwas.study.key().name()}}">&raquo;</a></td>
+        <td><a class="btn-mini btn-info" href="/gene/{{gwas.gene.name}}">{{gwas.gene.name}} &raquo;</a></td>
+        <td>{{gwas.intergenic}}</td>
+        <td>{{gwas.OR_beta}}</td>
+        <td>{{gwas.p_val}}</td>
+        <td>{{gwas.riscAlleleFrequency}}</td>
+        <td>{{gwas.CI}}</td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
