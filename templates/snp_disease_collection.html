@@ -1,23 +1,26 @@
 <div class="row-fluid">
     <div class="span9">
-        <h2> <a href="/collections/">Collections</a> > <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> > related diseases
+        <h2> <a href="/collections/">Collections</a> &gt; <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> &gt; Related Diseases</h2>
         <!-- <div class="row"> -->
-            {% for snp in snps %}    
-            <h4>rs{{snp.snpid}}</h4>
-            {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
-            <table class="table">
+        <table class="table">
                 <thead>
                 <tr>
-                    <th class="">Disease</th>
+                    <th>Disease</th>
                     <th>Gene</th>
-                    <th class="">Intergenic</th>                
-                    <th class="">Odds Ratio</th>
-                    <th class="">p&#8209;Value</th>
-                    <th class="">Allele Freq.</th>
-                    <th class="">CI</th>
+                    <th>Intergenic</th>                
+                    <th>Odds Ratio</th>
+                    <th>p&#8209;Value</th>
+                    <th>Allele Freq.</th>
+                    <th>CI</th>
                 </tr>
                 </thead>
                 <tbody>
+            {% for snp in snps %} 
+            <tr>
+                <td colspan="7"><h4>SNP ID: {{snp.snpid}}:</h4></td>
+            </td>
+            {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
+            
             {% for gwas in snp.gwas %}
                 <tr>
                     <td><a href="/disease/{{gwas.disease.name}}">{{gwas.disease.name}}</a>   <a class="btn-mini btn-info" href="/study/{{gwas.study.key().name()}}">&raquo;</a></td>
@@ -29,10 +32,11 @@
                     <td>{{gwas.CI}}</td>
                 </tr>
             {% endfor %}
-                </tbody>
-            </table>
+                
             {% endif %}        
             {% endfor %}
+        </tbody>
+        </table>
         <!-- </div> -->
     </div>
 
