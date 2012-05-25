@@ -5,19 +5,19 @@
         <table class="table">
                 <thead>
                 <tr>
-                    <th class="">&nbsp;</th>
+                    <th>Disease</th>
                     <th>Gene</th>
-                    <th class="">Intergenic</th>                
-                    <th class="">Odds Ratio</th>
-                    <th class="">p&#8209;Value</th>
-                    <th class="">Allele Freq.</th>
-                    <th class="">CI</th>
+                    <th>Intergenic</th>                
+                    <th>Odds Ratio</th>
+                    <th>p&#8209;Value</th>
+                    <th>Allele Freq.</th>
+                    <th>CI</th>
                 </tr>
                 </thead>
                 <tbody>
             {% for snp in snps %} 
             <tr>
-                <td colspan="7"><h4>rs{{snp.snpid}}:</h4></td>
+                <td colspan="7"><h4>SNP ID: {{snp.snpid}}:</h4></td>
             </td>
             {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
             
