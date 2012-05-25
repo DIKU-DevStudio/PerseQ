@@ -24,12 +24,19 @@ def reset():
     """
     memcache.flush_all()
 
+def AddDiseaseDocument(d):
+    doc = search.Document(doc_id="".join(d.name.split()), # doesnt allow spaces
+        fields=[
+            search.TextField(name='name', value=d.name),
+            ])
+    search.Index(name=d._index).add(doc)
+
+
 def AddStudyDocument(study):
     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
         fields=[
             search.TextField(name='name', value=study.name),
             search.TextField(name='disease_trait', value=study.disease_trait),
-            search.TextField(name='abstract', value=study.abstract),
             search.TextField(name='id', value=study.pubmed_id)
             ])
     search.Index(name=study._index).add(doc)
@@ -110,6 +117,7 @@ def populate(path="gwascatalog.txt", limit=100):
         disease_name = rel["Disease/Trait"].strip().lower()
         disease = Disease.get_or_insert(disease_name,
             name=disease_name)
+        AddDiseaseDocument(disease)
 
         # create or get study with study_id
         study = Study.get_or_insert(pid,
