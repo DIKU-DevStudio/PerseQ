@@ -1,7 +1,15 @@
-<form method="GET" class="pull-right">
-    <input class="input search-query" placeholder="Study search" name="filter" />
-</form>
 <h2>Studies</h2>
+<form method="GET" class="well form-inline">
+    <input class="input search-query span4" placeholder="Study search"
+        name="filter" value="{{filter if filter is defined}}" />
+    <input type="submit" value="Search" class="btn btn-primary" />
+</form>
+{% if filter is defined %}
+<h3><small>Showing results for "{{filter}}". <a href="/studies/">Back</a></small></h3>
+{% else %}
+<h3><small>Showing all studies.</small></h3>
+{% endif %}
+
 {% for study in studies %}
 <article class="row-fluid">
     <p class="span1">{{study.date}}</p>

@@ -1,9 +1,18 @@
-<form method="GET" class="pull-right">
-    <input class="input search-query" placeholder="Disease search" name="filter" />
+<h2>Diseases</h2>
+<form method="GET" class="well form-inline">
+    <input class="input search-query span4" placeholder="Disease search"
+    name="filter" value="{{filter if filter is defined}}" />
+    <input type="submit" value="Search" class="btn btn-primary" />
 </form>
 <div class="page-header">
 <h2>Diseases</h2>
 </div>
+{% if filter is defined %}
+<h3><small>Showing results for "{{filter}}". <a href="/diseases/">Back</a></small></h3>
+{% else %}
+<h3><small>Showing all diseases.</small></h3>
+{% endif %}
+
 {% for disease in diseases %}
 <article class="row">
     <div class="span10">

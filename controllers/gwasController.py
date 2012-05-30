@@ -17,10 +17,10 @@ class diseaseList(AppRequestHandler):
     _template = "baserender.html"
     def get(self):
         # if we need to myfilter later on..
-        myfilter = self.request.get("filter", None) # returns name of disease to myfilter on
-        if myfilter is not None:
+        myfilter = self.request.get("filter", "") # returns name of disease to myfilter on
+        if myfilter != "" and myfilter is not None:
             diseases = Disease.search_todict('"'+myfilter+'"')
-            return self.out(rendered = self.render("diseaselistrender.html", diseases = diseases))
+            return self.out(rendered = self.render("diseaselistrender.html", diseases = diseases, filter=myfilter))
 
         # snp = self.request.get("filter") # returns name of disease to myfilter on
         rendered = memcache.get("diseaselist_0:50")
@@ -28,7 +28,7 @@ class diseaseList(AppRequestHandler):
             # make large query, to check for speed when cached
             diseases = Disease.all().fetch(100)
             # generate only the bare-bones list of diseases, ignore everything from base.html etc.
-            rendered = self.render("diseaselistrender.html", diseases=diseases, filter=myfilter)
+            rendered = self.render("diseaselistrender.html", diseases=diseases)
 
             # add to memchache
             if not memcache.set('diseaselist_0:50', rendered):
@@ -72,10 +72,10 @@ class studyList(AppRequestHandler):
     _template = 'baserender.html'
     def get(self):
         # check memcache for main
-        myfilter = self.request.get("filter", None) # returns name of disease to filter on
-        if myfilter is not None:
+        myfilter = self.request.get("filter", "") # returns name of disease to filter on
+        if myfilter != "" and myfilter is not None:
             studies = Study.search_todict('"'+myfilter+'"')
-            return self.out(rendered = self.render("studylistrender.html", studies = studies))
+            return self.out(rendered = self.render("studylistrender.html", studies = studies, filter=myfilter))
 
         rendered = memcache.get("studylist_0:50")
         if rendered is None:
