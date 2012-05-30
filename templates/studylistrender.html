@@ -1,3 +1,6 @@
+<form method="GET" class="pull-right">
+    <input class="input search-query" placeholder="Study search" name="filter" />
+</form>
 <h2>Studies</h2>
 {% for study in studies %}
 <article class="row-fluid">
@@ -20,7 +23,7 @@
         </dl>
         <p><a href="/study/{{study.pubmed_id}}" class="btn btn-mini">
             Study #{{study.pubmed_id}}</a>
-            <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
+            <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{study.pubmed_id}}" class="btn btn-mini">View on pubmed</a>
         </p>
     </div>
 </article>

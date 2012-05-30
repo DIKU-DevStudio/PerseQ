@@ -33,11 +33,17 @@ def AddDiseaseDocument(d):
 
 
 def AddStudyDocument(study):
+    """Add study to fulltext"""
+    # TODO: Maybe move to just name and a dbkey?
     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
         fields=[
             search.TextField(name='name', value=study.name),
             search.TextField(name='disease_trait', value=','.join([s.name for s in study.diseases])),
-            search.TextField(name='id', value=study.pubmed_id)
+            search.TextField(name='pubmed_id', value=study.pubmed_id),
+            search.TextField(name='repl_sample', value=study.repl_sample),
+            search.TextField(name='platform', value=study.platform),
+            search.TextField(name='init_sample', value=study.init_sample),
+            search.DateField(name='date', value=study.date)
             ])
     search.Index(name=study._index).add(doc)
 
@@ -115,11 +121,12 @@ def populate(path="gwascatalog.txt", limit=100):
         # create a new study object for each new iteration
         # - use the first line to initiate the study model
         init = lines[0]
-        
+
+        # create or get study with study_id
         study = Study.get_or_insert(pid,
             name=init["Study"].strip(),
             pubmed_id = pid) # disease_ref = disease,
-    
+
         # populate study with static data
         # date = datetime.strptime(init["Date"].strip(), "%m/%d/%Y").date()
         study.date = datetime.strptime(init["Date"].strip(), "%m/%d/%Y").date()
@@ -128,7 +135,6 @@ def populate(path="gwascatalog.txt", limit=100):
         study.repl_sample= init["Replication Sample Size"].strip()
         study.platform = init["Platform [SNPs passing QC]"].strip()
         study.put()
-        AddStudyDocument(study)
 
         disease_name = None
         disease = None
@@ -167,7 +173,6 @@ def populate(path="gwascatalog.txt", limit=100):
                         if not disease.key() in gene.diseases:
                             gene.diseases.append(disease.key())
                         gene.put()
-                        AddGeneDocument(gene)
             else:
                 # up and downstream genes must be set
                 down_id = line["Downstream_gene_id"].strip()
@@ -216,7 +221,6 @@ def populate(path="gwascatalog.txt", limit=100):
                     if not disease.key() in snp.diseases:
                         snp.diseases.append(disease.key())
                     snp.put()
-                    AddSnpDocument(snp)
                 except:
                     # haplotype?
                     snpid = "N/A"
@@ -263,6 +267,7 @@ def populate(path="gwascatalog.txt", limit=100):
 
     memcache.flush_all()
     print "done"
+    update_search()
 
 def purge():
     """Clear the database to make ready for (re-)population"""
@@ -276,7 +281,10 @@ def purge():
             print e
             pass
     print "Datastore cleared"
+    purge_search()
 
+def purge_search():
+    """Clear all fulltext indexes"""
     for model in [Snp, Gene,GWAS, Study, Disease]:
         index = search.Index(name=model._index)
         while True:
@@ -288,6 +296,17 @@ def purge():
             # Remove the documents for the given ids from the Index.
             index.remove(document_ids)
     print "Fulltext docs cleared"
+
+def update_search():
+    """Populate fulltext indexes"""
+    for gene in Gene.all().run():
+        AddGeneDocument(gene)
+    for study in Study.all().run():
+        AddStudyDocument(study)
+    for disease in Disease.all().run():
+        AddDiseaseDocument(disease)
+    print "Fulltext docs updated"
+
 
 def snp_omim(snpids=None):
     """given list of snpids - returns the list of related OMIM IDs"""
