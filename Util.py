@@ -106,26 +106,18 @@ def populate(path="gwascatalog.txt", limit=100):
         else:
             pubids[pubid] = [doc]
 
-    i = 0
-    for pid, line in pubids.iteritems():
-        i += 1
-        if i == limit:
-            break
-        rel = line[0]
-        
-        # create or get disease with disease_name as key
-        disease_name = rel["Disease/Trait"].strip().lower()
-        disease = Disease.get_or_insert(disease_name,
-            name=disease_name)
-        AddDiseaseDocument(disease)
-
-        # create or get study with study_id
+    # i = 0
+    for pid, lines in pubids.iteritems():
+        # i += 1
+        # if limit is not None and i == limit:
+        #     break
+        init = lines[0]
+        # create a new study object for each new iteration
         study = Study.get_or_insert(pid,
-            name=rel["Study"].strip(),
-            disease_trait = disease_name,
-            disease_ref = disease,
-            pubmed_id = pid)
-        
+        name=init["Study"].strip(),
+        disease_trait = line["Disease/Trait"].strip().lower(),
+        pubmed_id = pid) # disease_ref = disease,
+    
         # parse date of study
         date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
         # populate model
@@ -137,7 +129,19 @@ def populate(path="gwascatalog.txt", limit=100):
         study.put()
         AddStudyDocument(study)
 
-        for rel in line:
+        disease_name = None
+        disease = None
+        for line in lines:
+            if study is None:
+
+
+            tmp = line["Disease/Trait"].strip().lower()
+            if disease_name != tmp:
+                disease_name = tmp
+            
+            disease = Disease.get_or_insert(disease_name,
+                name=disease_name)
+            AddDiseaseDocument(disease)
             # A gwas has either a direct gene or a 
             # down-stream and up-stream gene
             gene = None
@@ -146,16 +150,16 @@ def populate(path="gwascatalog.txt", limit=100):
 
             # The retards at GWAS use 1 == intergenic, 2 == not intergenic
             # ... no seriously, _retards_
-            intergenic = rel["Intergenic"].strip() == "2"
+            intergenic = line["Intergenic"].strip() == "2"
 
             if not intergenic:
-                geneid = rel["Snp_gene_ids"].strip()
+                geneid = line["Snp_gene_ids"].strip()
                 if geneid != "":
                 # not intergenic => one direct gene
-                    names = rel["Mapped_gene"].split(" - ")
+                    names = line["Mapped_gene"].split(" - ")
                     if len(names) == 1:
                         gene = Gene.get_or_insert(geneid,
-                            name = rel["Mapped_gene"],
+                            name = line["Mapped_gene"],
                             geneid = geneid)
                         if not study.key() in gene.studies:
                             gene.studies.append(study.key())
@@ -165,11 +169,11 @@ def populate(path="gwascatalog.txt", limit=100):
                         AddGeneDocument(gene)
             else:
                 # up and downstream genes must be set
-                down_id = rel["Downstream_gene_id"].strip()
-                up_id = rel["Upstream_gene_id"].strip()
+                down_id = line["Downstream_gene_id"].strip()
+                up_id = line["Upstream_gene_id"].strip()
 
                 if up_id != "" and down_id != "":
-                    up_down_names = rel["Mapped_gene"].split(" - ")
+                    up_down_names = line["Mapped_gene"].split(" - ")
                     if len(up_down_names) < 2:
                         # gene = NR / NS or whatever..
                         up_down_names = ["N/A", "N/A"]
@@ -195,12 +199,12 @@ def populate(path="gwascatalog.txt", limit=100):
 
             # init snps..
             snp = None
-            snpid = rel["Snp_id_current"].strip()
+            snpid = line["Snp_id_current"].strip()
 
             if snpid != "":
                 # non=blank snp
                 try:
-                    # create relation only if a 'single' snp is in the gwas
+                    # create lineation only if a 'single' snp is in the gwas
                     int(snpid)
                     snp = Snp.get_or_insert(snpid,
                         snpid=snpid)
@@ -215,7 +219,7 @@ def populate(path="gwascatalog.txt", limit=100):
                 except:
                     # haplotype?
                     snpid = "N/A"
-            # if no gene or snp relation is mentioned - ignore and just insert study
+            # if no gene or snp lineation is mentioned - ignore and just insert study
             if (gene is None or up_gene is None) and snp is None:
                 print "skipping gwas"
                 continue
@@ -235,25 +239,25 @@ def populate(path="gwascatalog.txt", limit=100):
                 gwas.gene = gene
 
             # parse remaining gwas information
-            gwas.p_string = rel["p-Value"].strip()
+            gwas.p_string = line["p-Value"].strip()
             # could be none
             gwas.snps = snpid
 
             # parse out the exponent: 6E-8 => -8
             try:
                 # test that p-Value is actually a float before parsing out
-                float(rel["p-Value"])
-                gwas.p_val = int(rel["p-Value"].split("E-")[1])  
+                float(line["p-Value"])
+                gwas.p_val = int(line["p-Value"].split("E-")[1])  
             except Exception, e:
                 # forces the filter to downgrade this gwas wrt. p-value
                 gwas.p_val = 0
             # could be interesting
             gwas.strongest_snp_risk_allele = \
-                rel["Strongest SNP-Risk Allele"].strip()
-            # gwas.CI = rel["95% CI (text)"].strip()
-            gwas.OR_beta = rel["OR or beta"].strip()
+                line["Strongest SNP-Risk Allele"].strip()
+            # gwas.CI = line["95% CI (text)"].strip()
+            gwas.OR_beta = line["OR or beta"].strip()
             gwas.riscAlleleFrequency = \
-                rel["Risk Allele Frequency"].strip()
+                line["Risk Allele Frequency"].strip()
             gwas.put()
 
     memcache.flush_all()
