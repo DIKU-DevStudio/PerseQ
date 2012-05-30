@@ -19,8 +19,7 @@ class diseaseList(AppRequestHandler):
         # if we need to myfilter later on..
         myfilter = self.request.get("filter", None) # returns name of disease to myfilter on
         if myfilter is not None:
-            results = Disease.search('"'+myfilter+'"')
-            diseases = [{field.name:field.value} for doc in results.results for field in doc.fields]
+            diseases = Disease.search_todict('"'+myfilter+'"')
             return self.out(rendered = self.render("diseaselistrender.html", diseases = diseases))
 
         # snp = self.request.get("filter") # returns name of disease to myfilter on
@@ -75,13 +74,7 @@ class studyList(AppRequestHandler):
         # check memcache for main
         myfilter = self.request.get("filter", None) # returns name of disease to filter on
         if myfilter is not None:
-            results = Study.search('"'+myfilter+'"')
-            studies = []
-            for doc in results.results:
-                study = {}
-                for field in doc.fields:
-                    study[field.name] = field.value
-                studies.append(study)
+            studies = Study.search_todict('"'+myfilter+'"')
             return self.out(rendered = self.render("studylistrender.html", studies = studies))
 
         rendered = memcache.get("studylist_0:50")
