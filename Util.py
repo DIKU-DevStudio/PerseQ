@@ -32,14 +32,14 @@ def AddDiseaseDocument(d):
     search.Index(name=d._index).add(doc)
 
 
-def AddStudyDocument(study):
-    doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
-        fields=[
-            search.TextField(name='name', value=study.name),
-            search.TextField(name='disease_trait', value=study.disease_trait),
-            search.TextField(name='id', value=study.pubmed_id)
-            ])
-    search.Index(name=study._index).add(doc)
+# def AddStudyDocument(study):
+#     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
+#         fields=[
+#             search.TextField(name='name', value=study.name),
+#             search.TextField(name='disease_trait', value=study.diseases),
+#             search.TextField(name='id', value=study.pubmed_id)
+#             ])
+#     search.Index(name=study._index).add(doc)
 
 def AddSNPDocument(snp):
     doc = search.Document(
@@ -100,48 +100,49 @@ def populate(path="gwascatalog.txt", limit=100):
     # read all GWAS into a dictionary, using pubmed_id as key
     # - collecting all GWAS assorted with the same study under same key
     for doc in docs:
-        pubid = doc["PUBMEDID"]
+        pubid = doc["PUBMEDID"].strip()
         if pubids.has_key(pubid):
             pubids[pubid].append(doc)
         else:
             pubids[pubid] = [doc]
 
-    # i = 0
+    i = 0
     for pid, lines in pubids.iteritems():
-        # i += 1
-        # if limit is not None and i == limit:
-        #     break
-        init = lines[0]
+        i += 1
+        if i == 200:
+            break
+        print i
         # create a new study object for each new iteration
+        # - use the first line to initiate the study model
+        init = lines[0]
+        
         study = Study.get_or_insert(pid,
-        name=init["Study"].strip(),
-        disease_trait = line["Disease/Trait"].strip().lower(),
-        pubmed_id = pid) # disease_ref = disease,
+            name=init["Study"].strip(),
+            pubmed_id = pid) # disease_ref = disease,
     
-        # parse date of study
-        date = datetime.strptime(rel["Date"].strip(), "%m/%d/%Y").date()
-        # populate model
-        study.date = date
-        study.pubmed_url=rel["Link"].strip()
-        study.init_sample = rel["Initial Sample Size"].strip()
-        study.repl_sample= rel["Replication Sample Size"].strip()
-        study.platform = rel["Platform [SNPs passing QC]"].strip()
+        # populate study with static data
+        # date = datetime.strptime(init["Date"].strip(), "%m/%d/%Y").date()
+        study.date = datetime.strptime(init["Date"].strip(), "%m/%d/%Y").date()
+        study.pubmed_url=init["Link"].strip()
+        study.init_sample = init["Initial Sample Size"].strip()
+        study.repl_sample= init["Replication Sample Size"].strip()
+        study.platform = init["Platform [SNPs passing QC]"].strip()
         study.put()
-        AddStudyDocument(study)
+        # AddStudyDocument(study)
 
         disease_name = None
         disease = None
         for line in lines:
-            if study is None:
-
-
+            # if the disease in this GWAS row differs from the other
+            # ones in this study, create new disease relation:
             tmp = line["Disease/Trait"].strip().lower()
             if disease_name != tmp:
                 disease_name = tmp
+                disease = Disease.get_or_insert(disease_name,
+                    name=disease_name)
+                study.add_disease(disease)
+                AddDiseaseDocument(disease)
             
-            disease = Disease.get_or_insert(disease_name,
-                name=disease_name)
-            AddDiseaseDocument(disease)
             # A gwas has either a direct gene or a 
             # down-stream and up-stream gene
             gene = None

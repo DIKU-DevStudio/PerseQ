@@ -26,7 +26,7 @@ class diseaseList(AppRequestHandler):
         rendered = memcache.get("diseaselist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
-            diseases = Disease.all()
+            diseases = Disease.all().fetch(100)
             # generate only the bare-bones list of diseases, ignore everything from base.html etc.
             rendered = self.render("diseaselistrender.html", diseases=diseases, filter=filter)
 
@@ -51,9 +51,14 @@ class diseaseView(AppRequestHandler):
         if rendered is None:
             # make large query, to check for speed when cached
             disease = db.get(db.Key.from_path("Disease", name))
+            studies = db.get(disease.studies)
+            if studies is None:
+                logging.info("ERRRRRRROR: no studies!")
+            else:
+                logging.info("%s" % studies)
 
             # generate only the bare-bones list of diseases, ignore everything from base.html etc.
-            rendered = self.render("diseaseview.html", disease=disease)
+            rendered = self.render("diseaseview.html", disease=disease, studies=studies)
 
             # add to memchache
             if not memcache.set(name, rendered, namespace="disease"):
@@ -77,7 +82,7 @@ class studyList(AppRequestHandler):
         rendered = memcache.get("studylist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
-            studies = Study.all().fetch(50)
+            studies = Study.all().fetch(100)
             rendered = self.render("studylistrender.html",studies=studies, filter=filter)
             # logging.debug(rendered )
             # add to memchache

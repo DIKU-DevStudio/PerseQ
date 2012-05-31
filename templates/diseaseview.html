@@ -1,5 +1,6 @@
 <h2>Disease: {{disease.name}}</h2>
-{% for study in disease.studies %}
+{% for study in studies %}
+<h3>{{study}}</h3>
 <article class="row">
     <time class="span1">{{study.date}}</time>
     <div class="span10">

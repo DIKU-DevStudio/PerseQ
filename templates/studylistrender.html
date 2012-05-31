@@ -3,7 +3,11 @@
 <article class="row">
     <time class="span1">{{study.date}}</time>
     <div class="span10">
-    <h3>{{study.disease_trait}}</h3>
+        {% for disease in study.diseases %}
+            <h3>{{disease.name()}}</h3>
+        {% else %}
+            <h3>No disease relations</h3>
+        {% endfor %}
     <h3><small>{{study.name}}</small></h3>
     <dl class="dl-horizontal">
         <dt>Sample size(s):</dt>

@@ -7,7 +7,7 @@ class Disease(AppModel):
     studies = db.ListProperty(db.Key)
     _index = 'Diseases'
 
-    @property
+    # @property
     def add_study(self, study_key):
         # add study as relation only if it's not already in the list
         if study_key not in self.studies:
@@ -30,7 +30,7 @@ class Study(AppModel):
     # disease_ref = db.ReferenceProperty(Disease, required=True, collection_name="studies")
     diseases = db.ListProperty(db.Key) # keys to diseases
     # to prevent relation traversal
-    disease_trait = db.StringProperty(required=True)
+    # disease_trait = db.StringProperty(required=True)
 
     abstract = db.StringProperty()
     # 8 - antal forsogspersoner
@@ -39,12 +39,11 @@ class Study(AppModel):
     repl_sample = db.StringProperty()
     platform = db.StringProperty()
     
-    @property
-    def add_disease(self, disease_name):
+    # @property
+    def add_disease(self, disease):
         # realation between disease and study is a many_to_many
         # - this helps make sure that is kept when importing
         # add disease to diseases attribute and add this study to the disease
-        disease = Disease.get_or_insert(disease_name)
         if disease.key() not in self.diseases:
             self.diseases.append(disease.key())
             self.put()
