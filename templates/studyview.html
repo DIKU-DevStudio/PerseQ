@@ -9,7 +9,7 @@ Study - {{study.name}}
     <a href="/studies/">Studies</a> <span class="divider">/</span>
   </li>
   <li>
-    <a href="/study/{{study.key().name()}}">{{study.name}}</a>
+    <a href="/study/{{study.key().name()}}">{{study.name|truncate(50)}}</a>
   </li>
 </ul>
 <article class="row-fluid">
@@ -27,9 +27,9 @@ Study - {{study.name}}
         <dl class="dl-horizontal">
             <dt>Sample size(s):</dt>
                 <dd>{{study.init_sample}}</dd>
-            <dt>Replication sample:</dt>
+            <dt class="span2">Replication sample:</dt>
                 <dd>{{study.repl_sample}}</dd>
-            <dt>Platform</dt>
+            <dt class="span2">Platform</dt>
                 <dd> {{study.platform}}</dd>
         </dl>
         <p>
