@@ -95,15 +95,21 @@ class studyList(AppRequestHandler):
 
 class studyView(AppRequestHandler):
     """View a particular study"""
-    def get(self, i):
+    def get(self, pubmed_id):
         self.setTemplate('studyview.html')
-        study = Study.gql("WHERE pubmed_id = :1", i).get()
+        study = Study.get_by_key_name(pubmed_id)
+        if study is None:
+            self.redirect('/studies/')
+            return
         self.out(study=study)
 
     # Comment on a study via POST
-    def post(self, i):
+    def get(self, pubmed_id):
         self.setTemplate('studyview.html')
-        study = Study.gql("WHERE pubmed_id = :1", i).get()
+        study = Study.get_by_key_name(pubmed_id)
+        if study is None:
+            self.redirect('/studies/')
+            return
 
         comment = Comment()
         comment.study = study.key()
