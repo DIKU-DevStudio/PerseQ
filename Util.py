@@ -32,14 +32,14 @@ def AddDiseaseDocument(d):
     search.Index(name=d._index).add(doc)
 
 
-# def AddStudyDocument(study):
-#     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
-#         fields=[
-#             search.TextField(name='name', value=study.name),
-#             search.TextField(name='disease_trait', value=study.diseases),
-#             search.TextField(name='id', value=study.pubmed_id)
-#             ])
-#     search.Index(name=study._index).add(doc)
+def AddStudyDocument(study):
+    doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
+        fields=[
+            search.TextField(name='name', value=study.name),
+            # search.TextField(name='disease_trait', value=study.diseases),
+            search.TextField(name='id', value=study.pubmed_id)
+            ])
+    search.Index(name=study._index).add(doc)
 
 def AddSNPDocument(snp):
     doc = search.Document(
@@ -109,7 +109,7 @@ def populate(path="gwascatalog.txt", limit=100):
     i = 0
     for pid, lines in pubids.iteritems():
         i += 1
-        if i == 200:
+        if i == 100:
             break
         print i
         # create a new study object for each new iteration
@@ -128,7 +128,7 @@ def populate(path="gwascatalog.txt", limit=100):
         study.repl_sample= init["Replication Sample Size"].strip()
         study.platform = init["Platform [SNPs passing QC]"].strip()
         study.put()
-        # AddStudyDocument(study)
+        AddStudyDocument(study)
 
         disease_name = None
         disease = None
