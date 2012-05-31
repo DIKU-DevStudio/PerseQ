@@ -1,14 +1,15 @@
 <h2>Studies</h2>
 {% for study in studies %}
-<article class="row">
+<article class="row-fluid">
     <time class="span1">{{study.date}}</time>
-    <div class="span10">
-        {% for disease in study.diseases %}
-            <h3>{{disease.name()}}</h3>
-        {% else %}
-            <h3>No disease relations</h3>
-        {% endfor %}
+    <div class="span11">
     <h3><small>{{study.name}}</small></h3>
+    <h4>Disease(s):</h4>
+    <ul>
+            {% for disease in study.diseases %}
+                <li> <h4><a href="/disease/{{disease.name()}}">{{disease.name()}}</a></h4> </li>
+            {% endfor %}
+        </ul>
     <dl class="dl-horizontal">
         <dt>Sample size(s):</dt>
             <dd>{{study.init_sample}}</dd>
