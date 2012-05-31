@@ -1,21 +1,29 @@
 {% extends "base.html" %}
 {% block title %}
-Study Details: {{study.name}}
+Study - {{study.name}}
 {% endblock %}
 
 {% block content %}
-    <article class="row-fluid">
+<ul class="breadcrumb">
+  <li>
+    <a href="/studies/">Studies</a> <span class="divider">/</span>
+  </li>
+  <li>
+    <a href="/study/{{study.key().name()}}">{{study.name}}</a>
+  </li>
+</ul>
+<article class="row-fluid">
         <!-- <time class="span1">{{study.date}}</time> -->
         <div class="span12">
         <div class="page-header">
-            <h2>Study <br> <small>{{study.name}}</small> </h2>
+            <h3>{{study.name}}</h3>
         </div>
         <h3>Disease(s):</h3>
         <ul>
             {% for disease in study.diseases %}
-                <li><a href="/disease/{{disease.name()}}">{{disease.name()}}</a></li>
+                <li> <h4><a href="/disease/{{disease.name()}}">{{disease.name()}}</a></h4> </li>
             {% endfor %}
-            </ul>
+        </ul>
         <dl class="dl-horizontal">
             <dt>Sample size(s):</dt>
                 <dd>{{study.init_sample}}</dd>
@@ -63,8 +71,7 @@ Study Details: {{study.name}}
         </table>
         {% endif %}
         </div>
-    </article>
-
+</article>
 {% block comments %}
 {% set comments = study.comments %}
 {% include 'comments.html' %}

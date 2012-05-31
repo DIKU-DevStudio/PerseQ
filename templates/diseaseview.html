@@ -1,4 +1,16 @@
-<h2>Disease: {{disease.name}}</h2>
+<ul class="breadcrumb">
+  <li>
+    <a href="/diseases/">Diseases</a> <span class="divider">/</span>
+  </li>
+  <li>
+    <a href="/disease/{{disease.name}}">{{disease.name}}</a>
+  </li>
+</ul>
+
+<div class="page-header">
+    <h2>{{disease.name}}</h2>
+</div>
+
 {% for study in studies %}
 <h3>{{study}}</h3>
 <article class="row">
