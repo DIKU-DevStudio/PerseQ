@@ -104,7 +104,7 @@ class studyView(AppRequestHandler):
         self.out(study=study)
 
     # Comment on a study via POST
-    def get(self, pubmed_id):
+    def post(self, pubmed_id):
         self.setTemplate('studyview.html')
         study = Study.get_by_key_name(pubmed_id)
         if study is None:
@@ -144,7 +144,6 @@ class genePresenter(AppRequestHandler):
     _template = 'gene.html'
     def get(self, gene):
         gene = Gene.gql("WHERE name = :1", gene).get()
-
         self.out(gene=gene)
 
     # Comment on a gene via POST
