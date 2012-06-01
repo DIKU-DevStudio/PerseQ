@@ -36,7 +36,7 @@ def AddStudyDocument(study):
     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
         fields=[
             search.TextField(name='name', value=study.name),
-            # search.TextField(name='disease_trait', value=study.diseases),
+            search.TextField(name='disease_trait', value=','.join([s.name for s in study.diseases])),
             search.TextField(name='id', value=study.pubmed_id)
             ])
     search.Index(name=study._index).add(doc)
