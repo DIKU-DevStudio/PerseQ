@@ -6,14 +6,13 @@ Gene Details
 {% block content %}
 {% if gene %}
 <h1>{{gene.name}}</h1>
-
 <table class="table table-striped">
     <thead><th><h1><small>Referenced by</small></h1></th><th><h1><small>Correlated with</small></h1></th></thead>
     <tbody>
         {% for gwas in gene.gwas %}
         <tr>
             <td><a href="/study/{{gwas.study.pubmed_id}}">{{gwas.study.name}}</a></td>
-            <td>{{gwas.study.disease_trait}}</td>
+            <td>{{gwas.disease.name}}</td>
         </tr>
         {% endfor %}
     </tbody>

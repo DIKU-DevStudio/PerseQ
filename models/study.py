@@ -4,9 +4,16 @@ from models.Application import AppModel
 class Disease(AppModel):
     """For viewing a unique list of diseases, we need a disease to be a relation and not just a textfield"""
     name = db.StringProperty(required=True)
-
-
+    studies = db.ListProperty(db.Key)
     _index = 'Diseases'
+
+    # @property
+    def add_study(self, study_key):
+        # add study as relation only if it's not already in the list
+        if study_key not in self.studies:
+            self.studies.append(study_key)
+            self.put()
+
 
 # PK = pubmed_id
 class Study(AppModel):
@@ -20,9 +27,10 @@ class Study(AppModel):
     # 6 - description of study
     name = db.StringProperty(required=True)
     # 7 disease or trait researched
-    disease_ref = db.ReferenceProperty(Disease, required=True, collection_name="studies")
+    # disease_ref = db.ReferenceProperty(Disease, required=True, collection_name="studies")
+    diseases = db.ListProperty(db.Key) # keys to diseases
     # to prevent relation traversal
-    disease_trait = db.StringProperty(required=True)
+    # disease_trait = db.StringProperty(required=True)
 
     abstract = db.StringProperty()
     # 8 - antal forsogspersoner
@@ -31,6 +39,16 @@ class Study(AppModel):
     repl_sample = db.StringProperty()
     platform = db.StringProperty()
     
+    # @property
+    def add_disease(self, disease):
+        # realation between disease and study is a many_to_many
+        # - this helps make sure that is kept when importing
+        # add disease to diseases attribute and add this study to the disease
+        if disease.key() not in self.diseases:
+            self.diseases.append(disease.key())
+            self.put()
+        disease.add_study(self.key())
+
     @property
     def genes(self):
         return Gene.gql("WHERE studies = :1", self.key())
