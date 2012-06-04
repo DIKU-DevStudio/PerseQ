@@ -38,7 +38,7 @@ def AddStudyDocument(study):
     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
         fields=[
             search.TextField(name='name', value=study.name),
-            search.TextField(name='disease_trait', value=','.join([s.name for s in study.diseases])),
+            search.TextField(name='disease_trait', value=','.join([s.name() for s in study.diseases])),
             search.TextField(name='pubmed_id', value=study.pubmed_id),
             search.TextField(name='repl_sample', value=study.repl_sample),
             search.TextField(name='platform', value=study.platform),
@@ -147,7 +147,6 @@ def populate(path="gwascatalog.txt", limit=100):
                 disease = Disease.get_or_insert(disease_name,
                     name=disease_name)
                 study.add_disease(disease)
-                AddDiseaseDocument(disease)
             
             # A gwas has either a direct gene or a 
             # down-stream and up-stream gene
