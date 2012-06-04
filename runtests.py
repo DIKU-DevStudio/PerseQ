@@ -6,14 +6,16 @@ import platform
 # Install the Python unittest2 package before you run this script.
 import unittest2
 
-USAGE = """%prog SDK_PATH TEST_PATH
-Run unit tests for App Engine apps.
+USAGE = """%prog TEST_PATH SDK_PATH
+Run unit tests for App Engine apps. 
+This is a modified version of Google's suggested test script. 
+It handles cross platform issues with PATHs and such.
 
 SDK_PATH    Path to the SDK installation
 TEST_PATH   Path to package containing test modules"""
 
 
-def main(test_path, sdk_path="/usr/local/google_appengine"):
+def main(test_path, sdk_path):
     sys.path.insert(0, sdk_path)
     import dev_appserver
     dev_appserver.fix_sys_path()
