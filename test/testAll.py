@@ -1,5 +1,7 @@
 import unittest2
 import sys
+import webtest # easy_install webtest
+import webapp2
 
 # sys.path.insert(0, "/Users/pamad/dev/PerseQ/")
 # sys.path.insert(0, "/usr/local/google_appengine/")
@@ -13,10 +15,30 @@ from google.appengine.ext import db
 from google.appengine.ext import testbed
 
 from models.snp import snp
-
+from controllers.searchController import SearchHandler
 from models.study import Snp, Gene, Study, GWAS
 
 from Util import populate
+
+# Test app handlers
+class SearchHandlerTest(unittest2.TestCase):
+    def setUp(self):
+        # Create a WSGI application.
+        app = webapp2.WSGIApplication([('/', SearchHandler)])
+        # Wrap the app with WebTest's TestApp.
+        self.testapp = webtest.TestApp(app)
+
+    # Test the handler.
+    def test(self):
+        response = self.testapp.get('/search/')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(response.normal_body, 'Hello World!')
+        self.assertEqual(response.content_type, 'text/plain')
+
+# see http://webtest.pythonpaste.org/en/latest/index.html#making-requests
+    def testPost(self):
+        response = self.testapp.post('/search/SNP/',{'vars': 'values'})
+
 
 # test get_or_insert
 class DemoTestCase(unittest2.TestCase):

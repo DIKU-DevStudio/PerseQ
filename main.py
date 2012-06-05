@@ -21,8 +21,11 @@
 import controllers
 from webapp2 import WSGIApplication
 
-app = WSGIApplication(controllers.__routes__, debug=True)
+# Use a method so we can get the app for tests
+def application():
+    return WSGIApplication(controllers.__routes__, debug=True)
 
+app = application()
 # def main():
 #     #logging.info("Active routes: "+str(controllers.__routes__))
 #     application = webapp.WSGIApplication(controllers.__routes__,
