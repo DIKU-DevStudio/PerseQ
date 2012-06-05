@@ -56,30 +56,29 @@ class Collection(AppRequestHandler):
         # query for particular collection, creating if it does not exist
         coll = SNPCollection.all().ancestor(user).filter("name =", collection_name).get()
         if coll is None:
-            coll = SNPCollection(parent=user, name=collection_name)
-            coll.put()
-            # had issues with the instance not being ready, forces it to do a query for it
-            # coll = db.get(coll.key())
+            # should have a 404-page
+            self.redirect("/collections/")
+            return
 
-        # coll = SNPCollection.get_or_insert(parent=user, name=collection_name)
         # check or update cache
         # render from template
         render = self.render("collectionview.html",collection=coll)
         self.out(rendered=render)
 
     def post(self):
-        logging.info("yeah!")
+        # logging.info("yeah!")
         user = UserData.current()
         name = self.request.get("name")
         if name == "":
             self.redirect("/collections/")
+            return
 
-        coll = SNPCollection.all().ancestor(user).fiter("name =", name).get()
+        coll = SNPCollection.all().ancestor(user).filter("name =", name).get()
         if coll is None:
             coll = SNPCollection(parent=user, name=name)
             coll.put()
 
-        self.redirect("/collection/%s" % name)
+        self.redirect("/collection/?name=%s" % name)
         return
 
 class DeleteCollection(AppRequestHandler):

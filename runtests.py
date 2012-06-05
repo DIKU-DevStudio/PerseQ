@@ -30,7 +30,7 @@ def get_sdk_path():
     """
     SDK_PATH = ""
     print 'Checking OS PATH string to determine SDK location'
-    for path in os.environ['path'].split(';'):
+    for path in os.environ['PATH'].split(';'):
         if path.find("appengine") != -1:
             SDK_PATH = path
             break
@@ -65,5 +65,6 @@ if __name__ == '__main__':
         SDK_PATH = args[1]
 
     print "Running tests in following subdirectory: " + TEST_PATH
-    print_line()
+    # print_line()
+    print '-' * 70
     main(TEST_PATH,SDK_PATH)
