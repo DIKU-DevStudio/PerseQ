@@ -336,6 +336,16 @@ def omim_efetch(db=None, ids=None):
     handle.close()
     print pubs
 
+class PJEncoder(simplejson.JSONEncoder):
+    """Custom JSON encoder, since simplejson doesn't handle datetime"""
+    def default(self, obj):
+        if hasattr(obj, 'isoformat'):
+            return obj.isoformat()
+        else:
+            return simplejson.JSONEncoder.default(self, obj)
+
+
+
 class jTemplate():
     """Template helper, sets the template base path and uses a given renderer on
     the template."""
@@ -382,7 +392,7 @@ class AppRequestHandler(webapp2.RequestHandler):
     def toJson(self, dictionary, prettify = False):
         """Display JSON data template.
         Prettify flag tells whether to use the google code prettify markup"""
-        enc = simplejson.JSONEncoder()
+        enc = PJEncoder()
         data = {"json": enc.encode(dictionary)}
         if prettify:
             jTemplate.render("data/prettify/json.html", data , self.response.out.write);
