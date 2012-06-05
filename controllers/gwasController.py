@@ -16,19 +16,19 @@ class diseaseList(AppRequestHandler):
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     _template = "baserender.html"
     def get(self):
-        # if we need to filter later on..
-        filter = self.request.get("filter") # returns name of disease to filter on
-        if filter is not None:
-            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
-            filter = None
-            pass
-        # snp = self.request.get("filter") # returns name of disease to filter on
+        # if we need to myfilter later on..
+        myfilter = self.request.get("filter", "") # returns name of disease to myfilter on
+        if myfilter != "" and myfilter is not None:
+            diseases = Disease.search_todict('"'+myfilter+'"')
+            return self.out(rendered = self.render("diseaselistrender.html", diseases = diseases, filter=myfilter))
+
+        # snp = self.request.get("filter") # returns name of disease to myfilter on
         rendered = memcache.get("diseaselist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             diseases = Disease.all().fetch(100)
             # generate only the bare-bones list of diseases, ignore everything from base.html etc.
-            rendered = self.render("diseaselistrender.html", diseases=diseases, filter=filter)
+            rendered = self.render("diseaselistrender.html", diseases=diseases)
 
             # add to memchache
             if not memcache.set('diseaselist_0:50', rendered):
@@ -41,12 +41,12 @@ class diseaseView(AppRequestHandler):
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     _template = "baserender.html"
     def get(self, name):
-        #name = self.request.get("name") # returns name of disease to filter on
+        #name = self.request.get("name") # returns name of disease to myfilter on
         if name is None:
-            # TODO (pm): return error            
+            self.error(404)
             return
 
-        # snp = self.request.get("filter") # returns name of disease to filter on
+        # snp = self.request.get("filter") # returns name of disease to myfilter on
         rendered = memcache.get(name, namespace="disease")
         if rendered is None:
             # make large query, to check for speed when cached
@@ -72,26 +72,22 @@ class studyList(AppRequestHandler):
     _template = 'baserender.html'
     def get(self):
         # check memcache for main
-        filter = self.request.get("filter") # returns name of disease to filter on
-        if filter is not None:
-            # TODO (pm): do a filter query - possibly caching result if queries are not terribly random
-            # filter = None
-            pass
-            # studies = Study.gql("WHERE pubmed_id = :1", i).get()
+        myfilter = self.request.get("filter", "") # returns name of disease to filter on
+        if myfilter != "" and myfilter is not None:
+            studies = Study.search_todict('"'+myfilter+'"')
+            return self.out(rendered = self.render("studylistrender.html", studies = studies, filter=myfilter))
 
         rendered = memcache.get("studylist_0:50")
         if rendered is None:
             # make large query, to check for speed when cached
             studies = Study.all().fetch(100)
-            rendered = self.render("studylistrender.html",studies=studies, filter=filter)
+            rendered = self.render("studylistrender.html",studies=studies, myfilter=myfilter)
             # logging.debug(rendered )
             # add to memchache
             if not memcache.add('studylist_0:50', rendered):
                 logging.error("Memcache set failed.")
-        
-        self.out(rendered=rendered)
 
-        # self.out({'studies': studies})
+        self.out(rendered=rendered)
 
 class studyView(AppRequestHandler):
     """View a particular study"""
