@@ -8,14 +8,49 @@ Dashboard
 
 {% block content %}
 
-<div style="text-align:center;margin:0px auto;">
-    <p>Welcome, {{user.nickname()}}, to <a href="/">PerseQ</a>. Choose a path below.</p>
+<div id="intro-text" class="page-header">
+    <h1>Welcome to PerseQ <small>A tool for personalised SNP interpretation</small></h1>
+</div>
+<div class="row">
+    <div class="span6">
+        <h3>How PerseQ can help you</h3>
+        <ul>
+            <li>Your <abbr>SNP</abbr>s are what make you, you</li>
+            <li>PerseQ helps you find out what effect these SNPs might have</li>
+            <li>Are your SNPs related to a disease you might want to know about?</li>
+        </ul>
+    </div>    
+    <div class="span6">
+        <h3>Are you a researcher?</h3>
+        <ul>
+            <li>You can use PerseQ to monitor for new studies relating to SNPs of interest</li>
+            <li>There is a comprehensive, searchable database of the Genome Wide Association Studies.</li>
+            <li>Our data is indexed with links to the original articles on PubMed</li>
+        </ul>
+    </div>    
+</div>
+    <div class="page-header">
+        <h2>Choose a path below to start using our tools</h2>
+        <div class="row">
+            <div class="span6">
+                <ol>
+                    <li>If you are new, why not begin by looking at some <a href="/studies/">studies</a>?</li>
+                    <li>We have a large collection of data organised by <a href="/diseases/">disease</a>.</li>
+                    <li>If you have a list of SNPs of interest, put them in a <a href="/collections/">collection</a>.</li>
+                    <li>Use <a href="/search/">OmniSearch</a> to explore the data based on text or SNP ID.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+<nav style="text-align: center; margin: 0 auto">
 <ul class="nav nav-pills" style="display:inline-block;">
     <li><a href="/search/"   class="box search">OmniSearch</a></li>
     <li><a href="/diseases/"   class="box categories">Browse Diseases</a></li>
-    <li><a href="/studies/"   class="box categories">GWAS-Catalog</a></li>
-    <li><a href="/collections/" class="box journal">My Collections</a></li>
+    <li><a href="/studies/"   class="box categories">Study Catalog</a></li>
+    <li><a href="/collections/" class="box journal">My SNP Collections</a></li>
 </ul>
-</div>
+</nav>
+
 
 {% endblock %}
