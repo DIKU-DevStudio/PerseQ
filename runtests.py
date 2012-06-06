@@ -19,6 +19,23 @@ def main(test_path, sdk_path):
     sys.path.insert(0, sdk_path)
     import dev_appserver
     dev_appserver.fix_sys_path()
+
+
+    """Register search service"""
+    from google.appengine.api import apiproxy_stub_map
+    from google.appengine.api.search import simple_search_stub
+    apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
+    apiproxy_stub_map.apiproxy.RegisterStub('search',
+            simple_search_stub.SearchServiceStub())
+    """Register memcache service"""
+    from google.appengine.api.memcache import memcache_stub
+    apiproxy_stub_map.apiproxy.RegisterStub('memcache',
+            memcache_stub.MemcacheServiceStub())
+    """Register user service"""
+    from google.appengine.api import user_service_stub
+    apiproxy_stub_map.apiproxy.RegisterStub('user',
+            user_service_stub.UserServiceStub())
+
     suite = unittest2.loader.TestLoader().discover(test_path)
     unittest2.TextTestRunner(verbosity=2).run(suite)
 
@@ -30,7 +47,7 @@ def get_sdk_path():
     """
     SDK_PATH = ""
     print 'Checking OS PATH string to determine SDK location'
-    for path in os.environ['PATH'].split(';'):
+    for path in os.environ['PATH'].split(';') + sys.path:
         if path.find("appengine") != -1:
             SDK_PATH = path
             break
@@ -51,20 +68,19 @@ def print_line():
 if __name__ == '__main__':
     parser = optparse.OptionParser(USAGE)
     options, args = parser.parse_args()
-    
+
     if len(args) < 2:
         print_line()
         SDK_PATH = get_sdk_path()
         print_line()
         TEST_PATH = "test"
-    
+
     if len(args) >= 1:
         TEST_PATH = args[0]
-    
+
     if len(args) == 2:
         SDK_PATH = args[1]
 
     print "Running tests in following subdirectory: " + TEST_PATH
-    # print_line()
-    print '-' * 70
+    print_line()
     main(TEST_PATH,SDK_PATH)

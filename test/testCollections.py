@@ -1,7 +1,7 @@
 from controllers.collectionController import Collection
 from models.collection import SNPCollection
 from models.users import UserData
-from Util import TestCase
+from test.testUtils import TestCase
 
 # see http://webtest.pythonpaste.org/en/latest/index.html#making-requests
 class CollectionTests(TestCase):

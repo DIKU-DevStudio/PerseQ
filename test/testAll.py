@@ -22,6 +22,11 @@ from Util import populate
 
 # Test app handlers
 class SearchHandlerTest(unittest2.TestCase):
+    diseaseurl = '/search/disease/'
+    snpurl = '/search/snp/'
+    studyurl = '/search/study/'
+
+
     def setUp(self):
         # Create a WSGI application.
         app = webapp2.WSGIApplication([('/', SearchHandler)])
@@ -37,7 +42,17 @@ class SearchHandlerTest(unittest2.TestCase):
 
 # see http://webtest.pythonpaste.org/en/latest/index.html#making-requests
     def testPost(self):
-        response = self.testapp.post('/search/SNP/',{'vars': 'values'})
+        response = self.testapp.get('/search/snp/', status=404)
+
+    def testSnp(self):
+        # empty req should fail
+        response = self.testapp.get(self.snpurl, status=404)
+        self.assertEqual(response.status_int, 404)
+        # known existing snp
+        snp = '4343'
+        response = self.testapp.get(self.snpurl+'4343')
+        self.assertEqual(response.status_int, 200)
+        self.assertRegexpMatches(response.body, snp)
 
 
 # test get_or_insert
