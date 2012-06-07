@@ -21,21 +21,25 @@ Search for a SNP
     }
     function loadGene(html, ret) {
         for(it in ret) {
-            item = $('<h3><a href="/gene/'+ret[it]['name']+'">'+ret[it]['name']+'</a><small> also known as '+ret[it]['alias']+'</small></h3>')
+            item = $('<a href="/gene/'+ret[it]['name']+'">'+ret[it]['name']+'</a>');
+            if('alias' in ret[it] && ret[it]['alias'] != "[]") {
+                item.append('<small> also known as '+ret[it]['alias']+'</small>');
+            }
             html.append(item);
+            item.wrap('<h3 />');
         }
         return html;
     }
     function loadDisease(html, ret) {
         for(it in ret) {
-            item = $('<h4>'+ucwords(ret[it]['name'])+'</h4>');
+            item = $('<h3><a href="/disease/'+ret[it]['name']+'">'+ucwords(ret[it]['name'])+'</a></h3>');
             html.append(item);
         }
         return html;
     }
     function loadStudy(html, ret) {
         for(it in ret) {
-            item = $('<h3><a href="/study/'+ret[it]['id']+'">'+ret[it]['name']+'</a></h3>')
+            item = $('<h3><a href="/study/'+ret[it]['pubmed_id']+'">'+ret[it]['name']+'</a></h3>');
             html.append(item);
         }
         return html;
@@ -47,7 +51,7 @@ Search for a SNP
             // Build result html
             $('.'+btnid).remove();
             html = $('<div class="'+btnid+' row"></div>');
-            html.append($('<div class="span2">'+ucwords(btnid)+'</div>'));
+            html.append($('<div class="span2"><h3>'+ucwords(btnid)+'</h3></div>'));
             html.append(htmlCallback($('<div class="span10">'), ret));
             
             //Display it
@@ -93,21 +97,12 @@ Search for a SNP
 {% endblock %}
 
 {% block content %}
-<form class="well form-vertical" action="javascript:loadResults();" onsubmit="loadResults(); return false;">
-    <div class="row-fluid">
-        <div class="span7">
-            <p>Search for diseases, SNPs, genes or tags.</p>
-            <p><small>For instance try &quot;Rs9315385&quot;</small></p>
-            <input type="text" class="search-query span4" placeholder="OmniSearch" id="search" value="{{search if search}}" />
-            <input type="submit" value="Search" class="btn btn-primary" />
-        </div>
-        <div id="batchsearch" class="span5">
-            <p>Or look up a batch of SNPs or genes here</p>
-            <p><small>Paste comma-separated, or with one value per line</small></p>
-            <textarea name="batch" class="span4"></textarea>
-            <input type="submit" value="Search" class="btn btn-primary" />
-        </div>
-    </div>
+<h2>OmniSearch</h2>
+<form class="well form-inline" action="javascript:loadResults();" onsubmit="loadResults(); return false;">
+    <p>Search for diseases, SNPs, genes or tags.</p>
+    <p><small>For instance try &quot;Rs9315385&quot;</small></p>
+    <input type="text" class="search-query span10" placeholder="Type in your search" id="search" value="{{search if search}}" />
+    <input type="submit" value="Search" class="btn btn-primary" />
 </form>
 
 <div class="row span12">
