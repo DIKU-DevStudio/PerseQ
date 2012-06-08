@@ -89,6 +89,8 @@ class diseaseView(AppRequestHandler):
 class studyList(AppRequestHandler):
     """Show a list of studies"""
     _template = 'baserender.html'
+    diseasequery = PagedQuery(Study.all(), 10)
+    count = diseasequery.page_count()
     def get(self):
         # check memcache for main
         myfilter = self.request.get("filter", "") # returns name of disease to filter on
@@ -96,15 +98,28 @@ class studyList(AppRequestHandler):
             studies = Study.search_todict('"'+myfilter+'"')
             return self.out(rendered = self.render("studylistrender.html", studies = studies, filter=myfilter))
 
-        rendered = memcache.get("studylist_0:50")
-        if rendered is None:
+        page = self.request.get("page", "")
+        pagenr = None
+        if page == "":
+            pagenr = 1
+        else:
+            try:
+                pagenr = int(page)
+            except:
+                pagenr = 1
+
+        # get pagenumber from diseasequery
+        studies = self.diseasequery.fetch_page(pagenr)
+
+        # rendered = memcache.get("studylist_0:50")
+        # if rendered is None:
             # make large query, to check for speed when cached
-            studies = Study.all().fetch(100)
-            rendered = self.render("studylistrender.html",studies=studies, myfilter=myfilter)
+            # studies = Study.all().fetch(100)
+        rendered = self.render("studylistrender.html",studies=studies, myfilter=myfilter, page=pagenr, count=self.count)
             # logging.debug(rendered )
             # add to memchache
-            if not memcache.add('studylist_0:50', rendered):
-                logging.error("Memcache set failed.")
+            # if not memcache.add('studylist_0:50', rendered):
+            #     logging.error("Memcache set failed.")
 
         self.out(rendered=rendered)
 
