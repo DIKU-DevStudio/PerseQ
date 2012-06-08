@@ -12,27 +12,46 @@ import logging
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
+from he3.db.tower.paging import PagedQuery
+
 class diseaseList(AppRequestHandler):
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
     _template = "baserender.html"
+    diseasequery = PagedQuery(Disease.all(), 30)
+    count = diseasequery.page_count()
+
     def get(self):
         # if we need to myfilter later on..
         myfilter = self.request.get("filter", "") # returns name of disease to myfilter on
-        if myfilter != "" and myfilter is not None:
+        if myfilter != "":
             diseases = Disease.search_todict('"'+myfilter+'"')
             return self.out(rendered = self.render("diseaselistrender.html", diseases = diseases, filter=myfilter))
 
         # snp = self.request.get("filter") # returns name of disease to myfilter on
-        rendered = memcache.get("diseaselist_0:50")
-        if rendered is None:
-            # make large query, to check for speed when cached
-            diseases = Disease.all().fetch(100)
-            # generate only the bare-bones list of diseases, ignore everything from base.html etc.
-            rendered = self.render("diseaselistrender.html", diseases=diseases)
 
-            # add to memchache
-            if not memcache.set('diseaselist_0:50', rendered):
-                logging.error("Memcache set failed for 'diseaselist_0:50'")
+        # get number of pages
+        
+        # get page number
+        # if not specified => pagenr = 1
+        page = self.request.get("page", "")
+        pagenr = None
+        if page == "":
+            pagenr = 1
+        else:
+            try:
+                pagenr = int(page)
+            except:
+                pagenr = 1
+
+        # get pagenumber from diseasequery
+        diseases = self.diseasequery.fetch_page(pagenr)
+
+        # generate only the bare-bones list of diseases, ignore everything from base.html etc.
+        rendered = self.render("diseaselistrender.html", diseases=diseases, page=pagenr, count=self.count)
+
+        # # add to memchache
+        # if not memcache.set('diseaselist_0:50', rendered):
+        #     logging.error("Memcache set failed for 'diseaselist_0:50'")
 
         # use cached data to render page with user-date etc. intact.
         self.out(rendered = rendered)
