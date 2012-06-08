@@ -1,7 +1,7 @@
 <h2>SNP Collections</h2>
 <form class="well form-inline" method="post" action="/collection/">
-  <input id="name" name="name" type="text" class="input-small span10" placeholder="new collection..">
-  <button type="submit" class="btn">Create</button>
+  <input id="name" name="name" type="text" class="input-small span10" placeholder="New collection name..">
+  <button type="submit" class="btn btn-primary">Create</button>
 </form>
 {% for coll in collections %}
 	{% if loop.first %}

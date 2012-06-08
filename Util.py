@@ -34,7 +34,6 @@ def AddDiseaseDocument(d):
 
 def AddStudyDocument(study):
     """Add study to fulltext"""
-    # TODO: Maybe move to just name and a dbkey?
     doc = search.Document(doc_id=study.pubmed_id, # Treat pubmed_id as key
         fields=[
             search.TextField(name='name', value=study.name),
@@ -117,7 +116,7 @@ def populate(path="gwascatalog.txt", limit=100):
         i += 1
         if i == 100:
             break
-        print i
+        #print i
         # create a new study object for each new iteration
         # - use the first line to initiate the study model
         init = lines[0]
@@ -304,8 +303,9 @@ def update_search():
         AddStudyDocument(study)
     for disease in Disease.all().run():
         AddDiseaseDocument(disease)
+    for snp in Snp.all().run():
+        AddSNPDocument(snp)
     print "Fulltext docs updated"
-
 
 def snp_omim(snpids=None):
     """given list of snpids - returns the list of related OMIM IDs"""
@@ -358,8 +358,6 @@ class jTemplate():
         t = jTemplate._e.get_template(template)
         printer(t.render(variables))
 
-env = Environment(loader=FileSystemLoader(os.path.join(
-            os.path.dirname(__file__), 'templates')))
 class AppRequestHandler(webapp2.RequestHandler):
     """Base class for controllers"""
     _template = None
@@ -367,7 +365,7 @@ class AppRequestHandler(webapp2.RequestHandler):
     def render(self, template = None, **args):
         if template is None:
             raise Exception("No 'template' argument to render from")
-        temp = env.get_template(template)
+        temp = jTemplate._e.get_template(template)
         return temp.render(**args)
 
     def setTemplate(self, template):
@@ -386,7 +384,7 @@ class AppRequestHandler(webapp2.RequestHandler):
         dictionary['user_login'] = users.create_login_url('/')
         dictionary['user_admin'] = users.is_current_user_admin()
 
-        temp = env.get_template(self._template)
+        temp = jTemplate._e.get_template(self._template)
         self.response.write(temp.render(dictionary))
 
     def toJson(self, dictionary, prettify = False):
@@ -408,30 +406,3 @@ class AppRequestHandler(webapp2.RequestHandler):
         else:
             jTemplate.render("data/xml.html", data,self.response.out.write );
 
-import unittest2
-import controllers
-import webtest # easy_install webtest
-from google.appengine.ext import testbed
-class TestCase(unittest2.TestCase):
-    def setUp(self):
-        # Create a WSGI application.
-        app = webapp2.WSGIApplication(controllers.__routes__)
-        # Wrap the app with WebTest's TestApp.
-        self.testapp = webtest.TestApp(app)
-
-        self.testbed = testbed.Testbed()
-        # Then activate the testbed, which prepares the service stubs for use.
-        self.testbed.activate()
-        # Next, declare which service stubs you want to use.
-        self.testbed.init_datastore_v3_stub()
-        # self.testbed.init_user_stub()
-
-        # FUCK ME DET TOG LANG TID AT FINDE DET HER!!!
-        self.testbed.setup_env(
-            USER_EMAIL = 'test@example.com',
-            USER_ID = '123',
-            # USER_IS_ADMIN = '1',
-            overwrite = True)
-
-    def tearDown(self):
-        self.testbed.deactivate()
