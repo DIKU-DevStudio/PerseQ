@@ -5,20 +5,12 @@ from google.appengine.ext import testbed
 
 from models.study import Snp, Gene, Study, GWAS, Disease
 from test.testUtils import TestCase
-from Util import AddStudyDocument
-from Util import purge,populate
+from Util import AddStudyDocument, populate
 
 
 
 # test get_or_insert
 class SearchHandlerTest(TestCase):
-    """def setUpClass():
-        super(SearchHandlerTest, self).setUp()
-        purge()
-        populate()
-
-    def tearDownClass():
-        purge()"""
 
     def setUp(self):
         super(SearchHandlerTest, self).setUp()
@@ -45,25 +37,29 @@ class SearchHandlerTest(TestCase):
         study.put()
 
         AddStudyDocument(study)
-        result = Study.search_todict('pizza')
-        self.assertEqual(result, obj)
+        result = Study.search_todict('123')
+        self.assertEqual(obj['name'], result[0]['name']) #result[0], obj)
 
-    def testSearchPage(self):
+        self.tSearchPage()
+        self.tSearchStudy()
+        self.tSearchDisease()
+
+    def tSearchPage(self):
         search = '/search/'
-        response = self.testapp.get(search)
+        response = self.testapp.get('/search/')
         self.assertEqual(response.status_int, 200)
 
-    def testSearchStudy(self):
+    def tSearchStudy(self):
         search = '/search/study/'
         response = self.testapp.get(search, status=404)
         self.assertEqual(response.status_int, 404)
 
-        snp = '4343' # should exist
-        response = self.testapp.get(search+snp)
+        study = '17463249' # should exist
+        response = self.testapp.get(search+study)
         self.assertEqual(response.status_int, 200)
-        self.assertRegexpMatches(response.body, snp)
+        self.assertRegexpMatches(response.body, study)
 
-    def testSearchDisease(self):
+    def tSearchDisease(self):
         search = '/search/disease/'
         response = self.testapp.get(search, status=404)
         self.assertEqual(response.status_int, 404)
