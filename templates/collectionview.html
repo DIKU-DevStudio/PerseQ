@@ -1,6 +1,17 @@
+<ul class="breadcrumb">
+  <li>
+    <a href="/collections/">Collections</a> <span class="divider">/</span>
+  </li>
+  <li>
+    <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> <span class="divider">/</span>
+  </li>
+  <li>
+    SNPs
+  </li>
+</ul>
 <div class="row-fluid">
+  
     <div class="span9">
-    	<h2> <a href="/collections/">Collections</a> > <a href="/collection/?name={{collection.name}}">{{collection.name}}</a> > SNPs</h2>
       <form class="well form-inline" type="post" action="/addsnps/{{collection.name}}">
       <p><small>paste comma-seperated snpids: 10260404,3825776,12284594,7041847,16955379,rs1805007,12345</small></p>
         <input id="snps" name="snps" type="text" class="input-small span8" placeholder="Add snps to collection">

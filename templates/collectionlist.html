@@ -1,8 +1,15 @@
-<h2>SNP Collections</h2>
-<form class="well form-inline" method="post" action="/collection/">
+<div class="page-header">
+<h2>Collections</h2>
+</div>
+<div class="row-fluid">
+	<div class="span12">
+		<form class="well form-inline" method="post" action="/collection/">
   <input id="name" name="name" type="text" class="input-small span10" placeholder="New collection name..">
   <button type="submit" class="btn btn-primary">Create</button>
 </form>
+	</div>
+
+</div>
 {% for coll in collections %}
 	{% if loop.first %}
 	<table class="table">
