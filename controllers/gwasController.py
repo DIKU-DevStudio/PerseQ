@@ -12,13 +12,16 @@ import logging
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
+# from he3.src.he3.db.tower.pagin import PagedQuery
 from he3.db.tower.paging import PagedQuery
 
 class diseaseList(AppRequestHandler):
     """Present a unique list of diseases, each disease linking to a page listing the studies reporting on those diseases"""
-    _template = "baserender.html"
-    diseasequery = PagedQuery(Disease.all(), 30)
-    count = diseasequery.page_count()
+    def __init__(self, *args, **kwargs):
+        super(diseaseList, self).__init__(*args, **kwargs)
+        self._template = "baserender.html"
+        self.diseasequery = diseasequery
+        self.count = count
 
     def get(self):
         # if we need to myfilter later on..
@@ -86,11 +89,15 @@ class diseaseView(AppRequestHandler):
         # use cached data to render page with user-date etc. intact.
         self.out(rendered=rendered)
 
+
 class studyList(AppRequestHandler):
     """Show a list of studies"""
-    _template = 'baserender.html'
-    diseasequery = PagedQuery(Study.all(), 10)
-    count = diseasequery.page_count()
+    def __init__(self, *args, **kwargs):
+        super(studyList, self).__init__(*args, **kwargs)
+        self._template = 'baserender.html'
+        self.studyquery = PagedQuery(Study.all(), 10)
+        self.count = self.studyquery.page_count()
+
     def get(self):
         # check memcache for main
         myfilter = self.request.get("filter", "") # returns name of disease to filter on
@@ -109,7 +116,7 @@ class studyList(AppRequestHandler):
                 pagenr = 1
 
         # get pagenumber from diseasequery
-        studies = self.diseasequery.fetch_page(pagenr)
+        studies = self.studyquery.fetch_page(pagenr)
 
         # rendered = memcache.get("studylist_0:50")
         # if rendered is None:
