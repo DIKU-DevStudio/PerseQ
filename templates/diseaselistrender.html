@@ -1,12 +1,11 @@
+<div class="page-header">
 <h2>Diseases</h2>
+</div>
 <form method="GET" class="well form-inline">
     <input class="input search-query span10" placeholder="Disease search"
     name="filter" value="{{filter if filter is defined}}" />
     <input type="submit" value="Search" class="btn btn-primary" />
 </form>
-<div class="page-header">
-<h2>Diseases</h2>
-</div>
 {% if filter is defined %}
 <h3><small>Showing results for "{{filter}}". <a href="/diseases/">Back</a></small></h3>
 {% else %}

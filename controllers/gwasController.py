@@ -20,8 +20,8 @@ class diseaseList(AppRequestHandler):
     def __init__(self, *args, **kwargs):
         super(diseaseList, self).__init__(*args, **kwargs)
         self._template = "baserender.html"
-        self.diseasequery = diseasequery
-        self.count = count
+        self.diseasequery = PagedQuery(Disease.all(), 30)
+        self.count = self.diseasequery.page_count()
 
     def get(self):
         # if we need to myfilter later on..
@@ -88,6 +88,7 @@ class diseaseView(AppRequestHandler):
 
         # use cached data to render page with user-date etc. intact.
         self.out(rendered=rendered)
+
 
 
 class studyList(AppRequestHandler):
