@@ -114,7 +114,7 @@ def populate(path="gwascatalog.txt", limit=100):
     i = 0
     for pid, lines in pubids.iteritems():
         i += 1
-        if i == 100:
+        if i == 200:
             break
         #print i
         # create a new study object for each new iteration

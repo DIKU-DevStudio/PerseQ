@@ -13,14 +13,54 @@
 <h3><small>Showing all diseases.</small></h3>
 {% endif %}
 
-{% for disease in diseases %}
-<article class="row">
-    <div class="span10">
-        <!-- might want to alter that to key -->
-        <h3><a href="/disease/{{disease.name}}">{{disease.name}}</a></h3>
-    </div>
-</article>
-{% else %}
-    <!-- if the list is empty - could very well be a missing db init.. -->
-    <h3>No diseases..</h3>
-{% endfor %}
+{% if diseases %}
+	{% for disease in diseases %}
+	<article class="row">
+	    <div class="span10">
+	        <!-- might want to alter that to key -->
+	        <h3><a href="/disease/{{disease.name}}">{{disease.name}}</a></h3>
+	    </div>
+	</article>
+	{% else %}
+	    <!-- if the list is empty - could very well be a missing db init.. -->
+	    <h3>No diseases..</h3>
+	{% endfor %}
+
+	{% if page == 1 %}
+	<ul class="pager">
+		<li>
+  			<a href="">
+  				{{page}} / {{count}}
+  			</a>
+  		</li>
+  		<li>
+    		<a href="/diseases/?page={{page + 1}}">Next</a>
+  		</li>
+	</ul>
+	{% elif page == count %}
+	<ul class="pager">
+  		<li>
+    		<a href="#">Previous</a>
+  		</li>
+		<li>
+  			<a href="">
+  				{{page}} / {{count}}
+  			</a>
+  		</li>
+	</ul>
+	{% else %}
+	<ul class="pager">
+  		<li>
+    		<a href="/diseases/?page={{page-1}}">Previous</a>
+  		</li>
+  		<li>
+  			<a href="">
+  				{{page}} / {{count}}
+  			</a>
+  		</li>
+  		<li>
+    		<a href="/diseases/?page={{page + 1}}">Next</a>
+  		</li>
+	</ul>
+	{% endif %}
+{% endif %}
