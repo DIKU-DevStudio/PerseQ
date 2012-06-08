@@ -38,3 +38,42 @@
 {% else %}
 <h3>..No articles</h3>
 {% endfor %}
+{% if page %}
+    {% if page == 1 %}
+    <ul class="pager">
+        <li>
+            <a href="">
+                {{page}} / {{count}}
+            </a>
+        </li>
+        <li>
+            <a href="/studies/?page={{page + 1}}">Next</a>
+        </li>
+    </ul>
+    {% elif page == count %}
+    <ul class="pager">
+        <li>
+            <a href="/studies/?page={{page - 1}}">Previous</a>
+        </li>
+        <li>
+            <a href="">
+                {{page}} / {{count}}
+            </a>
+        </li>
+    </ul>
+    {% else %}
+    <ul class="pager">
+        <li>
+            <a href="/studies/?page={{page-1}}">Previous</a>
+        </li>
+        <li>
+            <a href="">
+                {{page}} / {{count}}
+            </a>
+        </li>
+        <li>
+            <a href="/studies/?page={{page + 1}}">Next</a>
+        </li>
+    </ul>
+    {% endif %}
+    {% endif %}

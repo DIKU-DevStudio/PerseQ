@@ -131,7 +131,7 @@ class AddSNPs(AppRequestHandler):
         # for testing
         # snps = '10260404,3825776,12284594,rs1805007,12345'
         # comma seperated list of snps
-        snpids = snps.split(',')
+        snpids = [snp.strip() for snp in snps.split(',')]
         # verify input:
         # - if snpid is not a valid integer-value
         #   replace with None and add to list of 'invalid' ids
