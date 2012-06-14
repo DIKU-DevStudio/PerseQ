@@ -3,7 +3,7 @@
     <a href="/diseases/">Diseases</a> <span class="divider">/</span>
   </li>
   <li>
-    <a href="/disease/{{disease.name}}">{{disease.name}}</a>
+    {{disease.name}}
   </li>
 </ul>
 
@@ -19,6 +19,7 @@
     <h3>
         <a href="/study/{{study.pubmed_id}}">
         {{study.name}}</a>
+        <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{study.pubmed_id}}" class="btn btn-success btn-mini">PubMed</a>
         </h3>
     <dl class="dl-horizontal">
         <dt>Sample size(s):</dt>
@@ -28,9 +29,6 @@
         <dt>Platform</dt>
             <dd> {{study.platform}}</dd>
     </dl>
-    <p>
-        <a href="{{study.pubmed_url}}" class="btn btn-mini">View on pubmed</a>
-    </p>
     </div>
 </article>
 {% else %}

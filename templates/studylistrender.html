@@ -16,7 +16,10 @@
 <article class="row-fluid">
     <p class="span1">{{study.date}}</p>
     <div class="span11">
-        <h3><small>{{study.name}}</small></h3>
+        <h3>
+            <a href="/study/{{study.pubmed_id}}"><small>{{study.name}}</small></a>
+            <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{study.pubmed_id}}" class="btn btn-success btn-mini">PubMed</a>
+        </h3>
         <h4>Disease(s):</h4>
         <ul>
         {% for disease in study.diseases %}
@@ -31,10 +34,6 @@
             <dt>Platform</dt>
                 <dd> {{study.platform}}</dd>
         </dl>
-        <p><a href="/study/{{study.pubmed_id}}" class="btn btn-mini">
-            Study #{{study.pubmed_id}}</a>
-            <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{study.pubmed_id}}" class="btn btn-mini">View on pubmed</a>
-        </p>
     </div>
 </article>
 {% else %}
