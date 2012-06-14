@@ -13,9 +13,9 @@
 
 {% for study in studies %}
 <h3>{{study}}</h3>
-<article class="row">
+<article class="row-fluid">
     <time class="span1">{{study.date}}</time>
-    <div class="span10">
+    <div class="span11">
     <h3>
         <a href="/study/{{study.pubmed_id}}">
         {{study.name}}</a>
