@@ -20,12 +20,14 @@
             <a href="/study/{{study.pubmed_id}}"><small>{{study.name}}</small></a>
             <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{study.pubmed_id}}" class="btn btn-success btn-mini">PubMed</a>
         </h3>
+        {% if study.disease %}
         <h4>Disease(s):</h4>
         <ul>
         {% for disease in study.diseases %}
             <li> <h4><a href="/disease/{{disease.name()}}">{{disease.name()}}</a></h4> </li>
         {% endfor %}
         </ul>
+        {% endif %}
         <dl class="dl-horizontal">
             <dt>Sample size(s):</dt>
                 <dd>{{study.init_sample}}</dd>
