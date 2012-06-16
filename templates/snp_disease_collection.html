@@ -27,7 +27,7 @@
                 <tbody>
             {% for snp in snps %} 
             <tr>
-                <td colspan="7"><h4>SNP ID: {{snp.snpid}}:</h4></td>
+                <td colspan="7"><h4>SNP ID: <a href="/snp/{{snp.snpid}}">rs{{snp.snpid}}</a>:</h4></td>
             </td>
             {% if snp.gwas %} <!-- list the GWAS relations of the SNP -->
             
