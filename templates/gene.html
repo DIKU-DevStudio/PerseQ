@@ -12,7 +12,7 @@ Gene Details
         {% for gwas in gene.gwas %}
         <tr>
             <td><a href="/study/{{gwas.study.pubmed_id}}">{{gwas.study.name}}</a></td>
-            <td>{{gwas.disease.name}}</td>
+            <td><a href="/disease/{{gwas.disease.name}}">{{gwas.disease.name}}</a></td>
         </tr>
         {% endfor %}
     </tbody>
